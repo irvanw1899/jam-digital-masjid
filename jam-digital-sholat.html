@@ -724,7 +724,8 @@
       <h3>Masukkan PIN</h3>
       <label>PIN Pengaturan</label>
       <input type="password" id="pinInput" inputmode="numeric" autocomplete="off" placeholder="••••">
-      <div id="pinError" style="color:var(--danger);font-size:12px;margin-top:6px;display:none;">PIN salah, coba lagi.</div>
+      <div id="pinError" style="color:var(--danger);font-size:12px;margin-top:6px;display:none;">PIN salah, coba lagi.
+      </div>
       <div class="modal-actions">
         <button class="btn primary" type="button" id="pinSubmit">Buka</button>
         <button class="btn ghost" type="button" id="pinCancel">Batal</button>
@@ -741,7 +742,8 @@
         <input type="text" id="inMasjidId" placeholder="contoh: al-ikhlas-cibubur">
         <button class="btn ghost" type="button" id="applyMasjidId">Ganti & Reload</button>
       </div>
-      <div id="masjidStatusBox" style="font-size:12px;color:var(--muted);margin:4px 0 14px;word-break:break-all;line-height:1.5;"></div>
+      <div id="masjidStatusBox"
+        style="font-size:12px;color:var(--muted);margin:4px 0 14px;word-break:break-all;line-height:1.5;"></div>
 
       <label>PIN Pengaturan (opsional — kosongkan untuk menonaktifkan)</label>
       <input type="password" id="inAdminPin" inputmode="numeric" autocomplete="off" placeholder="Contoh: 1234">
@@ -813,7 +815,8 @@
               <option value="off">Nonaktif</option>
             </select>
           </div>
-          <div><label>Jeda Adzan → Mulai Sholat Jumat (menit)</label><input type="number" min="0" id="inJumatKhutbah"></div>
+          <div><label>Jeda Adzan → Mulai Sholat Jumat (menit)</label><input type="number" min="0" id="inJumatKhutbah">
+          </div>
         </div>
         <div class="status-note" style="margin-top:8px">Setiap hari Jumat, kartu "Dzuhur" otomatis berganti label
           jadi "Jumat" dan memakai jeda di atas (menggantikan jeda Iqomah Dzuhur biasa) untuk menghitung mundur ke
@@ -864,6 +867,12 @@
         Iqomah masing-masing shalat (atur di bagian "Durasi Iqomah" di atas). Durasi di sini hanya dipakai untuk
         notifikasi <b>Iqomah</b> itu sendiri, dan sebagai cadangan bila jeda iqomah shalat tsb diset 0.</div>
 
+      <label>Kecepatan Teks Berjalan (px/detik)</label>
+      <input type="number" id="inTickerSpeed" min="10" max="400" step="5">
+      <div class="status-note" style="margin-top:4px">Berlaku untuk Bar Info (atas) & Teks Berjalan (bawah).
+        Angka lebih besar = geser lebih cepat. Kecepatan tetap terasa konsisten walau jumlah teksnya berubah, karena
+        durasinya dihitung otomatis dari panjang teks. Default: 80.</div>
+
       <label>Label Bar Info</label>
       <input type="text" id="inPetugasLabel">
 
@@ -893,23 +902,23 @@
   <script>
     (function () {
       const LIVE_CHANNEL_OPTIONS = [
-        {id: "MakkahLoop", videoId: "bNY8a2BB5Gc", type: "video", label: "Makkah Live / Video HD (Stabil)"},
-        {id: "MadinahLoop", videoId: "rHWSRMcGGBQ", type: "video", label: "Madinah Live / Video HD (Stabil)"},
-        {id: "UCos52azQNBgW63_9uDJoPDA", type: "channel", label: "KSA Qur'an TV (Live Official)"},
-        {id: "UCIsVsnu6C9EPnN7zkq0RNfA", type: "channel", label: "Haramain Live (Live Cadangan)"}
+        { id: "MakkahLoop", videoId: "bNY8a2BB5Gc", type: "video", label: "Makkah Live / Video HD (Stabil)" },
+        { id: "MadinahLoop", videoId: "rHWSRMcGGBQ", type: "video", label: "Madinah Live / Video HD (Stabil)" },
+        { id: "UCos52azQNBgW63_9uDJoPDA", type: "channel", label: "KSA Qur'an TV (Live Official)" },
+        { id: "UCIsVsnu6C9EPnN7zkq0RNfA", type: "channel", label: "Haramain Live (Live Cadangan)" }
       ];
 
       const JABODETABEK_PRESETS = {
-        "jakpus": {label: "Jakarta Pusat", lat: -6.1862, lng: 106.8347},
-        "jakut": {label: "Jakarta Utara", lat: -6.1214, lng: 106.8746},
-        "jaksel": {label: "Jakarta Selatan", lat: -6.2607, lng: 106.8017},
-        "jakbar": {label: "Jakarta Barat", lat: -6.1683, lng: 106.7588},
-        "jaktim": {label: "Jakarta Timur", lat: -6.2251, lng: 106.9004},
-        "bogor": {label: "Bogor", lat: -6.5971, lng: 106.8060},
-        "depok": {label: "Depok", lat: -6.4025, lng: 106.7942},
-        "tangerang": {label: "Tangerang", lat: -6.1783, lng: 106.6319},
-        "tangsel": {label: "Tangerang Selatan", lat: -6.2884, lng: 106.7183},
-        "bekasi": {label: "Bekasi", lat: -6.2383, lng: 107.0021}
+        "jakpus": { label: "Jakarta Pusat", lat: -6.1862, lng: 106.8347 },
+        "jakut": { label: "Jakarta Utara", lat: -6.1214, lng: 106.8746 },
+        "jaksel": { label: "Jakarta Selatan", lat: -6.2607, lng: 106.8017 },
+        "jakbar": { label: "Jakarta Barat", lat: -6.1683, lng: 106.7588 },
+        "jaktim": { label: "Jakarta Timur", lat: -6.2251, lng: 106.9004 },
+        "bogor": { label: "Bogor", lat: -6.5971, lng: 106.8060 },
+        "depok": { label: "Depok", lat: -6.4025, lng: 106.7942 },
+        "tangerang": { label: "Tangerang", lat: -6.1783, lng: 106.6319 },
+        "tangsel": { label: "Tangerang Selatan", lat: -6.2884, lng: 106.7183 },
+        "bekasi": { label: "Bekasi", lat: -6.2383, lng: 107.0021 }
       };
 
       const DEFAULT_STATE = {
@@ -926,20 +935,21 @@
         liveChannelId: "MakkahLoop",
         liveCustomUrl: "",
         petugasLabel: "INFO KEGIATAN",
+        tickerSpeed: 80,
         kasAwal: 5000000,
         kasMasuk: 2500000,
         kasKeluar: 1200000,
         showKas: "on",
-        iqomahDelay: {Subuh: 20, Dzuhur: 10, Ashar: 10, Maghrib: 5, Isya: 10},
+        iqomahDelay: { Subuh: 20, Dzuhur: 10, Ashar: 10, Maghrib: 5, Isya: 10 },
         iqomahNotif: "on",
         jumatMode: "on",
         jumatKhutbahMinutes: 35,
         adminPin: "",
         events: [
-          {title: "Imam: Ustadz Saiful Hidayat, M.Ag"},
-          {title: "Muadzin: Ahmad Fauzi"},
-          {title: "Kajian Ba'da Maghrib — Setiap Senin & Kamis"},
-          {title: "TPA Anak-anak — Sabtu & Minggu, 16:00"}
+          { title: "Imam: Ustadz Saiful Hidayat, M.Ag" },
+          { title: "Muadzin: Ahmad Fauzi" },
+          { title: "Kajian Ba'da Maghrib — Setiap Senin & Kamis" },
+          { title: "TPA Anak-anak — Sabtu & Minggu, 16:00" }
         ],
         ticker: [
           "Selamat datang di Masjid, mari makmurkan rumah Allah 🕌",
@@ -967,15 +977,15 @@
           } catch (e) { return; }
         }
         if (sharedAudioCtx.state === 'suspended') {
-          sharedAudioCtx.resume().catch(() => {});
+          sharedAudioCtx.resume().catch(() => { });
         }
       }
       ['click', 'touchstart', 'keydown'].forEach(evt => {
-        document.addEventListener(evt, unlockAudio, {once: false, passive: true});
+        document.addEventListener(evt, unlockAudio, { once: false, passive: true });
       });
 
       function formatRupiah(number) {
-        return new Intl.NumberFormat('id-ID', {style: 'currency', currency: 'IDR', maximumFractionDigits: 0}).format(number || 0);
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
       }
 
       // ====== FIREBASE (multi-masjid, sinkron real-time antar device) ======
@@ -1107,11 +1117,11 @@
 
       const dtr = d => d * Math.PI / 180;
       const rtd = r => r * 180 / Math.PI;
-      function fixHour(h) {h = h - 24 * Math.floor(h / 24); return h < 0 ? h + 24 : h;}
-      function fixAngle(a) {a = a - 360 * Math.floor(a / 360); return a < 0 ? a + 360 : a;}
+      function fixHour(h) { h = h - 24 * Math.floor(h / 24); return h < 0 ? h + 24 : h; }
+      function fixAngle(a) { a = a - 360 * Math.floor(a / 360); return a < 0 ? a + 360 : a; }
 
       function julianDate(y, m, d) {
-        if (m <= 2) {y -= 1; m += 12;}
+        if (m <= 2) { y -= 1; m += 12; }
         const A = Math.floor(y / 100);
         const B = 2 - A + Math.floor(A / 4);
         return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
@@ -1126,7 +1136,7 @@
         const RA = fixHour(rtd(Math.atan2(Math.cos(dtr(e)) * Math.sin(dtr(L)), Math.cos(dtr(L)))) / 15);
         const eqt = q / 15 - RA;
         const decl = rtd(Math.asin(Math.sin(dtr(e)) * Math.sin(dtr(L))));
-        return {decl, eqt};
+        return { decl, eqt };
       }
 
       function computeAngle(angle, lat, decl) {
@@ -1145,19 +1155,19 @@
       }
 
       function decToHM(dec) {
-        if (dec === null || isNaN(dec)) return {h: 0, m: 0};
+        if (dec === null || isNaN(dec)) return { h: 0, m: 0 };
         dec = fixHour(dec);
         let h = Math.floor(dec);
         let m = Math.round((dec - h) * 60);
-        if (m === 60) {m = 0; h += 1;}
+        if (m === 60) { m = 0; h += 1; }
         h = h % 24;
-        return {h, m};
+        return { h, m };
       }
-      function fmt(hm) {return String(hm.h).padStart(2, '0') + ':' + String(hm.m).padStart(2, '0');}
+      function fmt(hm) { return String(hm.h).padStart(2, '0') + ':' + String(hm.m).padStart(2, '0'); }
 
       function computePrayerTimes(date, lat, lng, tz, fajrAngle, ishaAngle, asrT, imsakMin, ihtiyat) {
         const jd = julianDate(date.getFullYear(), date.getMonth() + 1, date.getDate()) - lng / (15 * 24);
-        const {decl, eqt} = sunPosition(jd + 0.5);
+        const { decl, eqt } = sunPosition(jd + 0.5);
         const dhuhr = fixHour(12 - lng / 15 + tz - eqt);
         const haFajr = computeAngle(fajrAngle, lat, decl);
         const haIsha = computeAngle(ishaAngle, lat, decl);
@@ -1179,9 +1189,9 @@
 
       function hijriDate(date) {
         try {
-          const f = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {day: 'numeric', month: 'long', year: 'numeric'});
+          const f = new Intl.DateTimeFormat('id-ID-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' });
           return f.format(date) + ' H';
-        } catch (e) {return '';}
+        } catch (e) { return ''; }
       }
 
       function extractYoutubeId(input) {
@@ -1292,7 +1302,7 @@
         });
       }
 
-      function minutesOfDay(hm) {return hm.h * 60 + hm.m;}
+      function minutesOfDay(hm) { return hm.h * 60 + hm.m; }
 
       function getIqomahMinutes(name) {
         return minutesOfDay(todayTimes[name]) + getIqomahDelay(name);
@@ -1307,13 +1317,13 @@
           const adzanMin = minutesOfDay(todayTimes[name]);
           const iqomahMin = getIqomahMinutes(name);
           if (nowMin < adzanMin) {
-            return {name, minutes: adzanMin, phase: 'adzan'};
+            return { name, minutes: adzanMin, phase: 'adzan' };
           }
           if (nowMin < iqomahMin) {
-            return {name, minutes: iqomahMin, phase: 'iqomah'};
+            return { name, minutes: iqomahMin, phase: 'iqomah' };
           }
         }
-        return {name: "Subuh", minutes: minutesOfDay(todayTimes["Subuh"]) + 1440, phase: 'adzan', tomorrow: true};
+        return { name: "Subuh", minutes: minutesOfDay(todayTimes["Subuh"]) + 1440, phase: 'adzan', tomorrow: true };
       }
 
       function playBeep() {
@@ -1340,7 +1350,7 @@
             });
           };
           if (ctx.state === 'suspended') {
-            ctx.resume().then(startSequence).catch(() => {});
+            ctx.resume().then(startSequence).catch(() => { });
           } else {
             startSequence();
           }
@@ -1423,7 +1433,7 @@
       function updateClock() {
         const now = getNow();
         $('bigClock').textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        $('dateMasehi').textContent = now.toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        $('dateMasehi').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         $('dateHijri').textContent = hijriDate(now);
 
         updateAdzanTimerDisplay();
@@ -1531,7 +1541,31 @@
 
         refreshPrayerTimes();
         renderBgStream();
+        applyTickerSpeeds();
       }
+
+      // Mengatur kecepatan teks berjalan (px/detik) berdasarkan panjang teks aktual,
+      // supaya kecepatan yang dirasakan konsisten meski jumlah info/ticker berubah-ubah
+      // (kalau durasi animasi dipatok tetap, teks yang lebih panjang akan terasa lebih cepat
+      // dan teks yang lebih pendek terasa lebih lambat).
+      function applyTickerSpeeds() {
+        const speed = Math.max(10, Number(state.tickerSpeed) || 80); // px per detik
+        [$('petugasTrack'), $('tickerTrack')].forEach(track => {
+          if (!track) return;
+          const distance = track.scrollWidth || track.offsetWidth || 0;
+          if (distance > 0) {
+            track.style.animationDuration = (distance / speed).toFixed(2) + 's';
+          }
+        });
+      }
+
+      let tickerResizeTimer = null;
+      window.addEventListener('resize', () => {
+        // Lebar container ikut memengaruhi jarak scroll (padding-left:100%),
+        // jadi dihitung ulang saat ukuran layar berubah (debounce ringan).
+        clearTimeout(tickerResizeTimer);
+        tickerResizeTimer = setTimeout(applyTickerSpeeds, 200);
+      });
 
       function populateModalFields() {
         $('inMasjidId').value = MASJID_ID;
@@ -1558,6 +1592,7 @@
         $('inSound').value = state.sound;
         $('inNotifDuration').value = state.notifDurationSec !== undefined ? state.notifDurationSec : 45;
         $('inPetugasLabel').value = state.petugasLabel;
+        $('inTickerSpeed').value = state.tickerSpeed !== undefined ? state.tickerSpeed : 80;
 
         $('inKasAwal').value = state.kasAwal !== undefined ? state.kasAwal : 0;
         $('inKasMasuk').value = state.kasMasuk !== undefined ? state.kasMasuk : 0;
@@ -1711,7 +1746,7 @@
       $('addEvent').addEventListener('click', () => {
         const val = $('newEvTitle').value.trim();
         if (val) {
-          state.events.push({title: val});
+          state.events.push({ title: val });
           $('newEvTitle').value = '';
           renderEventEditList();
         }
@@ -1744,6 +1779,7 @@
         state.sound = $('inSound').value;
         state.notifDurationSec = Math.max(5, parseInt($('inNotifDuration').value) || 45);
         state.petugasLabel = $('inPetugasLabel').value.trim() || "INFO KEGIATAN";
+        state.tickerSpeed = Math.max(10, parseInt($('inTickerSpeed').value) || 80);
 
         state.kasAwal = parseFloat($('inKasAwal').value) || 0;
         state.kasMasuk = parseFloat($('inKasMasuk').value) || 0;
