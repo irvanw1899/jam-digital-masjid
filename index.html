@@ -185,6 +185,56 @@
       box-shadow: none;
     }
 
+    .icon-btn.sound-blocked .dot {
+      background: #e8895a;
+      box-shadow: 0 0 5px #e8895a;
+    }
+
+    .beep-toast {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 30px;
+      background: rgba(5, 11, 14, 0.82);
+      border: 1px solid rgba(232, 184, 75, 0.3);
+      backdrop-filter: blur(3px);
+      color: var(--white);
+      font-size: 12.5px;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      max-width: 80vw;
+    }
+
+    .beep-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .beep-toast .bt-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .beep-toast.ok .bt-dot {
+      background: #2bff86;
+      box-shadow: 0 0 5px #2bff86;
+    }
+
+    .beep-toast.fail .bt-dot {
+      background: #e8895a;
+      box-shadow: 0 0 5px #e8895a;
+    }
+
     .petugas-bar {
       flex: 0 0 auto;
       height: 38px;
@@ -808,6 +858,8 @@
     </div>
     <div class="head-right">
       <div class="icon-btn" id="bgToggleBtn" title="Live Streaming Masjidil Haram"><span class="dot"></span></div>
+      <div class="icon-btn" id="soundStatusBtn" title="Status Suara Beep (klik untuk tes)"><span class="dot"></span>
+      </div>
       <div class="icon-btn gear" id="gearBtn" title="Pengaturan">⚙</div>
       <div class="date-box">
         <div class="date-hijri" id="dateHijri">-</div>
@@ -924,6 +976,8 @@
   <div class="ticker-bar">
     <div class="ticker-track" id="tickerTrack"></div>
   </div>
+
+  <div class="beep-toast" id="beepToast"><span class="bt-dot"></span><span id="beepToastText"></span></div>
 
   <div class="adzan-overlay" id="adzanOverlay">
     <div class="aw" id="adzanText">Waktu Shalat Telah Tiba</div>
@@ -1076,6 +1130,17 @@
         <option value="on">Aktif</option>
         <option value="off">Nonaktif</option>
       </select>
+      <div class="row2" style="margin-top:8px;">
+        <button class="btn ghost" type="button" id="testBeepAzan">🔊 Tes Beep Adzan</button>
+        <button class="btn ghost" type="button" id="testBeepIqomah">🔊 Tes Beep Iqomah</button>
+      </div>
+      <div class="status-note" style="margin-top:4px">Gunakan tombol tes untuk memastikan perangkat ini benar-benar
+        mengeluarkan suara. Nada Adzan (3x, nada tinggi) dan Iqomah (2x, nada lebih rendah) sengaja dibedakan supaya
+        mudah dikenali tanpa melihat layar. Ikon 🔔 di pojok kanan atas header menunjukkan status: <b>hijau</b> =
+        suara siap dimainkan, <b>oranye</b> = browser memblokir audio otomatis (klik ikon tsb, atau sentuh layar
+        sekali saja untuk mengaktifkan kembali). Setiap kali waktu adzan/iqomah benar-benar masuk, sistem otomatis
+        mengecek apakah beep berhasil dimainkan dan menampilkan notifikasi kecil di pojok kanan atas sebagai
+        konfirmasi.</div>
 
       <label>Durasi Notifikasi Iqomah & Fallback Tampil di Layar (detik)</label>
       <input type="number" id="inNotifDuration" min="5" max="300" step="5">
@@ -1190,15 +1255,46 @@
         if (!sharedAudioCtx) {
           try {
             sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          } catch (e) { return; }
+          } catch (e) { setSoundStatusIcon(false); return; }
         }
         if (sharedAudioCtx.state === 'suspended') {
-          sharedAudioCtx.resume().catch(() => { });
+          sharedAudioCtx.resume()
+            .then(() => setSoundStatusIcon(sharedAudioCtx.state === 'running'))
+            .catch(() => setSoundStatusIcon(false));
+        } else {
+          setSoundStatusIcon(true);
         }
       }
       ['click', 'touchstart', 'keydown'].forEach(evt => {
         document.addEventListener(evt, unlockAudio, { once: false, passive: true });
       });
+
+      // ====== PENGECEKAN STATUS & KONFIRMASI BEEP (Adzan/Iqomah) ======
+      // Menampilkan ikon status suara di header (hijau = siap, oranye = diblokir browser)
+      // dan toast konfirmasi singkat setiap kali beep dicoba dimainkan — baik saat waktu
+      // adzan/iqomah benar-benar masuk, maupun saat admin menekan tombol "Tes Beep" di
+      // menu Pengaturan. Ini menjawab kebutuhan untuk MENGECEK apakah beep benar-benar
+      // berbunyi, bukan cuma berasumsi kode "seharusnya" berbunyi.
+      function setSoundStatusIcon(ok) {
+        const btn = $('soundStatusBtn');
+        if (!btn) return;
+        btn.classList.toggle('sound-blocked', !ok);
+        btn.title = ok
+          ? 'Status Suara Beep: Siap ✓ (klik untuk tes)'
+          : 'Status Suara Beep: Diblokir browser — klik untuk mencoba mengaktifkan';
+      }
+
+      let beepToastTimer = null;
+      function showBeepToast(ok, text) {
+        const el = $('beepToast');
+        if (!el) return;
+        el.classList.remove('ok', 'fail');
+        el.classList.add(ok ? 'ok' : 'fail');
+        $('beepToastText').textContent = text;
+        el.classList.add('show');
+        clearTimeout(beepToastTimer);
+        beepToastTimer = setTimeout(() => el.classList.remove('show'), 4500);
+      }
 
       function formatRupiah(number) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
@@ -1871,35 +1967,66 @@
         return { name: "Subuh", minutes: minutesOfDay(todayTimes["Subuh"]) + 1440, phase: 'adzan', tomorrow: true };
       }
 
-      function playBeep() {
-        if (state.sound !== 'on') return;
-        try {
-          if (!sharedAudioCtx) {
-            sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // playBeep(kind) mengembalikan Promise yang resolve dengan:
+      //   true   -> beep berhasil dimainkan
+      //   false  -> beep GAGAL dimainkan (browser memblokir AudioContext / error lain)
+      //   null   -> tidak dicoba sama sekali karena pengaturan suara memang dinonaktifkan
+      // kind: 'azan' | 'iqomah' | 'test-azan' | 'test-iqomah'
+      // Nada azan (880Hz, 3x) sengaja dibedakan dari nada iqomah (660Hz, 2x, jeda lebih
+      // panjang) supaya pengurus bisa membedakan keduanya cukup dari telinga.
+      function playBeep(kind) {
+        const isRealTrigger = (kind === 'azan' || kind === 'iqomah');
+        if (isRealTrigger && state.sound !== 'on') {
+          return Promise.resolve(null);
+        }
+        return new Promise((resolve) => {
+          try {
+            if (!sharedAudioCtx) {
+              sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const ctx = sharedAudioCtx;
+            const isIqomah = (kind === 'iqomah' || kind === 'test-iqomah');
+            const freq = isIqomah ? 660 : 880;
+            const beepCount = isIqomah ? 2 : 3;
+            const gapSec = isIqomah ? 0.45 : 0.35;
+
+            const startSequence = () => {
+              const now0 = ctx.currentTime;
+              for (let i = 0; i < beepCount; i++) {
+                const t = i * gapSec;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now0 + t);
+                gain.gain.setValueAtTime(0.0001, now0 + t);
+                gain.gain.exponentialRampToValueAtTime(0.18, now0 + t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now0 + t + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now0 + t);
+                osc.stop(now0 + t + 0.32);
+              }
+              setSoundStatusIcon(true);
+              resolve(true);
+            };
+
+            if (ctx.state === 'suspended') {
+              ctx.resume().then(() => {
+                if (ctx.state === 'running') {
+                  startSequence();
+                } else {
+                  setSoundStatusIcon(false);
+                  resolve(false);
+                }
+              }).catch(() => { setSoundStatusIcon(false); resolve(false); });
+            } else {
+              startSequence();
+            }
+          } catch (e) {
+            setSoundStatusIcon(false);
+            resolve(false);
           }
-          const ctx = sharedAudioCtx;
-          const startSequence = () => {
-            const now0 = ctx.currentTime;
-            [0, 0.35, 0.7].forEach(t => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.type = 'sine';
-              osc.frequency.setValueAtTime(880, now0 + t);
-              gain.gain.setValueAtTime(0.0001, now0 + t);
-              gain.gain.exponentialRampToValueAtTime(0.18, now0 + t + 0.02);
-              gain.gain.exponentialRampToValueAtTime(0.0001, now0 + t + 0.3);
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start(now0 + t);
-              osc.stop(now0 + t + 0.32);
-            });
-          };
-          if (ctx.state === 'suspended') {
-            ctx.resume().then(startSequence).catch(() => { });
-          } else {
-            startSequence();
-          }
-        } catch (e) { /* audio tidak tersedia di perangkat ini */ }
+        });
       }
 
       function scheduleAutoHide(durationSecOverride) {
@@ -1942,7 +2069,17 @@
         }
 
         $('adzanOverlay').classList.add('show');
-        playBeep();
+        playBeep('azan').then(ok => {
+          if (ok === true) {
+            console.log(`[Cek Beep] Adzan ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
+            showBeepToast(true, `🔊 Beep Adzan ${displayName} dimainkan`);
+          } else if (ok === false) {
+            console.warn(`[Cek Beep] Adzan ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
+            showBeepToast(false, `⚠ Beep Adzan ${displayName} GAGAL — audio diblokir browser`);
+          } else {
+            console.log(`[Cek Beep] Adzan ${displayName}: suara memang dinonaktifkan di pengaturan`);
+          }
+        });
       }
 
       function updateAdzanTimerDisplay() {
@@ -1971,7 +2108,17 @@
         $('adzanTimerLabel').style.display = 'none';
         $('adzanTimer').classList.remove('show');
         $('adzanOverlay').classList.add('show');
-        playBeep();
+        playBeep('iqomah').then(ok => {
+          if (ok === true) {
+            console.log(`[Cek Beep] Iqomah ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
+            showBeepToast(true, `🔊 Beep Iqomah ${displayName} dimainkan`);
+          } else if (ok === false) {
+            console.warn(`[Cek Beep] Iqomah ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
+            showBeepToast(false, `⚠ Beep Iqomah ${displayName} GAGAL — audio diblokir browser`);
+          } else {
+            console.log(`[Cek Beep] Iqomah ${displayName}: suara memang dinonaktifkan di pengaturan`);
+          }
+        });
         scheduleAutoHide(); // notifikasi iqomah tetap pakai durasi umum (bukan interval adzan)
       }
 
@@ -2260,6 +2407,31 @@
         renderBgStream();
       });
 
+      $('soundStatusBtn').addEventListener('click', () => {
+        unlockAudio();
+        playBeep('test-azan').then(ok => {
+          showBeepToast(ok !== false, ok !== false
+            ? '🔊 Suara siap — apakah terdengar bunyi bip?'
+            : '⚠ Audio masih diblokir browser, coba sentuh layar lalu klik lagi');
+        });
+      });
+
+      $('testBeepAzan').addEventListener('click', () => {
+        playBeep('test-azan').then(ok => {
+          showBeepToast(ok !== false, ok !== false
+            ? '🔊 Tes Beep Adzan dimainkan (3x nada tinggi) — terdengar?'
+            : '⚠ Tes gagal — audio diblokir browser, sentuh layar dahulu lalu coba lagi');
+        });
+      });
+
+      $('testBeepIqomah').addEventListener('click', () => {
+        playBeep('test-iqomah').then(ok => {
+          showBeepToast(ok !== false, ok !== false
+            ? '🔊 Tes Beep Iqomah dimainkan (2x nada rendah) — terdengar?'
+            : '⚠ Tes gagal — audio diblokir browser, sentuh layar dahulu lalu coba lagi');
+        });
+      });
+
       $('adzanClose').addEventListener('click', () => {
         $('adzanOverlay').classList.remove('show');
         $('adzanOverlay').classList.remove('iqomah-mode');
@@ -2357,6 +2529,13 @@
       setInterval(updateClock, 1000);
       checkConnection();
       setInterval(checkConnection, CONN_CHECK_INTERVAL_MS);
+
+      // Pengecekan berkala status AudioContext, supaya ikon 🔔 di header selalu
+      // mencerminkan kondisi terkini (beberapa browser/OS bisa men-suspend audio
+      // lagi di tengah jalan, mis. setelah layar mati lalu menyala kembali).
+      setInterval(() => {
+        setSoundStatusIcon(!!sharedAudioCtx && sharedAudioCtx.state === 'running');
+      }, 5000);
 
     })();
   </script>
