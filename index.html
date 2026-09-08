@@ -1272,11 +1272,6 @@
       });
 
       // ====== PENGECEKAN STATUS & KONFIRMASI BEEP (Adzan/Iqomah) ======
-      // Menampilkan ikon status suara di header (hijau = siap, oranye = diblokir browser)
-      // dan toast konfirmasi singkat setiap kali beep dicoba dimainkan — baik saat waktu
-      // adzan/iqomah benar-benar masuk, maupun saat admin menekan tombol "Tes Beep" di
-      // menu Pengaturan. Ini menjawab kebutuhan untuk MENGECEK apakah beep benar-benar
-      // berbunyi, bukan cuma berasumsi kode "seharusnya" berbunyi.
       function setSoundStatusIcon(ok) {
         const btn = $('soundStatusBtn');
         if (!btn) return;
@@ -1299,14 +1294,6 @@
       }
 
       // ====== AUTO-RECOVER AUDIO (diam-diam, tanpa bunyi) ======
-      // Sekali AudioContext ter-unlock lewat sentuhan/klik pertama, ia biasanya tetap
-      // aktif selama halaman tidak reload. Tapi ada beberapa hal di luar kendali kode ini
-      // yang bisa membuatnya ke-suspend lagi di tengah jalan (mis. beberapa OS Android
-      // menahan proses audio saat layar mati lama, atau tab lama tidak aktif di background).
-      // Fungsi ini mencoba me-resume AudioContext secara diam-diam (tanpa memutar bip),
-      // sehingga kalau memang ke-suspend, sistem berusaha pulih sendiri tanpa menunggu
-      // ada orang yang menyentuh layar duluan. Dipanggil berkala + saat halaman kembali
-      // terlihat/aktif (device dinyalakan lagi / tab kembali fokus / koneksi pulih).
       function attemptSilentResume() {
         if (!sharedAudioCtx) {
           try {
@@ -1333,12 +1320,6 @@
       }
 
       // ====== FIREBASE (multi-masjid, sinkron real-time antar device) ======
-      // 1. Buka console.firebase.google.com -> project Anda -> Project settings -> General
-      //    -> scroll ke "Your apps" -> pilih app Web (</>) -> salin config di bawah ini.
-      // 2. Pastikan sudah membuat "Realtime Database" (bukan Firestore) di menu Build,
-      //    dan Rules-nya minimal begini supaya bisa baca/tulis:
-      //    { "rules": { ".read": true, ".write": true } }
-      //    (Untuk versi lebih aman, bisa ditambah otentikasi belakangan.)
       const firebaseConfig = {
         apiKey: "AIzaSyCqxnymd0ZqjBm9HHprohzNsP3cootklxA",
         authDomain: "jam-digital-masjid-80e1a.firebaseapp.com",
@@ -1349,8 +1330,6 @@
         appId: "1:718758710350:web:f0e618a9a72dfa29da071f"
       };
 
-      // ID masjid diambil dari URL (?masjid=kode-masjid). Kalau tidak ada,
-      // dipakai yang tersimpan terakhir di perangkat ini, atau "default".
       const urlParams = new URLSearchParams(window.location.search);
       let MASJID_ID = urlParams.get('masjid') || localStorage.getItem('mosque-clock-id') || 'default';
       MASJID_ID = MASJID_ID.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-') || 'default';
@@ -1372,11 +1351,6 @@
       }
 
       // ====== SINKRONISASI WAKTU SERVER ======
-      // Jam device (TV/HP/mini-PC) bisa meleset karena drift atau salah setting.
-      // Karena trigger adzan presisi ke detik ke-0, selisih waktu device vs waktu
-      // sebenarnya bisa bikin notifikasi adzan maju/mundur. Solusinya: hitung selisih
-      // (offset) antara jam device dan waktu server, lalu semua fungsi jam pakai
-      // getNow() (bukan `new Date()` langsung) yang sudah dikoreksi offset ini.
       let serverOffsetMs = 0;
       function getNow() {
         return new Date(Date.now() + serverOffsetMs);
@@ -1384,9 +1358,6 @@
 
       function syncServerTime() {
         if (fbReady) {
-          // Firebase Realtime Database punya node khusus '.info/serverTimeOffset'
-          // yang otomatis berisi (waktu server - waktu device) dalam milidetik,
-          // ter-update sendiri secara realtime tanpa perlu polling manual.
           try {
             firebase.database().ref('.info/serverTimeOffset').on('value', (snap) => {
               const val = snap.val();
@@ -1397,8 +1368,6 @@
             console.warn('Gagal sinkron waktu via Firebase, coba fallback API waktu publik', e);
           }
         }
-        // Fallback (Firebase tidak dikonfigurasi/gagal): pakai API waktu publik,
-        // di-refresh berkala tiap 15 menit untuk koreksi drift jam device.
         const fetchWorldTime = () => {
           fetch('https://worldtimeapi.org/api/timezone/Etc/UTC')
             .then(r => r.json())
@@ -1425,7 +1394,21 @@
         applyStateToDom();
       }
 
+      // ====== PERBAIKAN OFFLINE #1 ======
+      // SEBELUMNYA: kalau fbReady=true, applyStateToDom() HANYA dipanggil di dalam
+      // callback fbRef.on('value', ...). Kalau device baru dinyalakan dan internet
+      // benar-benar mati (belum pernah connect di sesi ini), listener Firebase RTDB
+      // tidak akan pernah memanggil callback maupun error-callback (bukan error
+      // permission, cuma menunggu koneksi) -> layar tetap blank tanpa waktu shalat
+      // sama sekali, padahal localStorage sudah punya data terakhir yang valid.
+      //
+      // SEKARANG: loadStateLocal() SELALU dipanggil lebih dulu secara sinkron supaya
+      // jam & waktu shalat langsung tampil dari cache lokal walau 100% offline.
+      // Firebase, kalau berhasil connect, jadi lapisan "update" di atasnya -
+      // applyStateToDom() dipanggil lagi begitu data online tersedia.
       function loadState() {
+        loadStateLocal(); // render instan dari cache lokal, jalan walau tidak ada internet sama sekali
+
         if (fbReady && fbRef) {
           fbRef.on('value', (snapshot) => {
             const data = snapshot.val();
@@ -1440,11 +1423,8 @@
             }
             applyStateToDom();
           }, (err) => {
-            console.error('Firebase gagal dibaca, fallback ke localStorage', err);
-            loadStateLocal();
+            console.error('Firebase gagal dibaca, tetap pakai data lokal yang sudah tampil', err);
           });
-        } else {
-          loadStateLocal();
         }
       }
 
@@ -1556,10 +1536,6 @@
       }
 
       // ====== SCREENSAVER / SLIDESHOW OTOMATIS ======
-      // Ditampilkan sebagai latar belakang ketika live streaming dimatikan (bgStream = 'off').
-      // Semua ilustrasi di bawah ini adalah gambar vektor (SVG) orisinal bergaya sama dengan
-      // ilustrasi "conn-overlay" yang sudah ada di kode ini — bukan foto asli — supaya ringan,
-      // tidak butuh koneksi internet, dan aman dari isu hak cipta foto/gambar pihak ketiga.
       const SCREENSAVER_SLIDES = [
         {
           caption: "Ka'bah — Masjidil Haram, Makkah Al-Mukarramah",
@@ -1810,6 +1786,13 @@
       }
 
       function startScreensaver() {
+        // Kalau screensaver sudah aktif (mis. dipicu oleh auto-fallback koneksi buruk
+        // sementara stopScreensaver() belum pernah dipanggil), jangan bangun ulang DOM-nya
+        // dari nol supaya tidak "loncat" balik ke slide pertama tiap kali dipanggil ulang.
+        if ($('screensaverWrap')) {
+          if (!screensaverTimer) screensaverTimer = setInterval(advanceScreensaver, SCREENSAVER_INTERVAL_MS);
+          return;
+        }
         stopScreensaver();
         buildScreensaverDom($('bgVideoInner'));
         screensaverTimer = setInterval(advanceScreensaver, SCREENSAVER_INTERVAL_MS);
@@ -1827,11 +1810,30 @@
         const btn = $('bgToggleBtn');
 
         if (state.bgStream !== 'on') {
-          // Live streaming dimatikan -> tampilkan screensaver/slideshow otomatis,
-          // bukan sekadar teks fallback statis.
           startScreensaver();
           btn.classList.add('off');
           setConnOverlay(false);
+          return;
+        }
+
+        // ====== PERBAIKAN OFFLINE #3 ======
+        // SEBELUMNYA: iframe YouTube langsung diberi src walau koneksi belum tentu
+        // ada. Kalau device offline, BROWSER SENDIRI menampilkan halaman error
+        // jaringan bawaannya (mis. "Looks like there's a problem with your internet
+        // connection") DI DALAM iframe itu — dan karena iframe ini sengaja dibuat
+        // memenuhi hampir seluruh layar (lihat .bg-video-inner), halaman error itu
+        // terlihat seperti seluruh tampilan jam rusak, bukan cuma video yang gagal.
+        // Overlay "menyambungkan kembali" yang menutupinya baru sempat terpasang
+        // SETELAH percobaan koneksi gagal terdeteksi, jadi ada jeda singkat di mana
+        // halaman error sempat "kebentur" tampil duluan.
+        // SEKARANG: iframe YouTube TIDAK PERNAH diberi src sama sekali sebelum
+        // koneksi internet benar-benar terkonfirmasi baik (connKnownGood === true).
+        // Selama status belum terkonfirmasi (termasuk sesaat setelah halaman baru
+        // dibuka), tampilan pakai screensaver — jadi tidak ada celah bagi browser
+        // untuk sempat menampilkan halaman error jaringannya sendiri.
+        if (!connKnownGood) {
+          startScreensaver();
+          btn.classList.remove('off'); // live streaming tetap "diinginkan aktif", cuma menunggu koneksi
           return;
         }
 
@@ -1862,18 +1864,29 @@
       }
 
       // ====== PEMANTAU KUALITAS KONEKSI (untuk live streaming latar belakang) ======
-      // Iframe YouTube sudah diset controls=0 & pointer-events:none (tidak bisa diklik),
-      // tapi saat koneksi internet buruk/putus-putus, YouTube tetap bisa sesaat menampilkan
-      // ikon bawaannya sendiri (play/pause/prev/next) ketika player mencoba buffer ulang.
-      // Karena iframe itu berasal dari domain YouTube (cross-origin), kita tidak bisa
-      // mematikan ikon tsb dari JS di halaman ini. Solusinya: pantau kualitas koneksi dari
-      // browser, dan begitu terdeteksi buruk, tutup rapat area video dengan overlay milik
-      // kita sendiri (pesan "menyambungkan kembali") sampai koneksi pulih — jadi ikon apa
-      // pun yang sempat muncul di iframe tertutup dan tidak terlihat jamaah.
       const CONN_CHECK_URL = 'https://www.gstatic.com/generate_204';
       const CONN_CHECK_INTERVAL_MS = 8000;
       const CONN_CHECK_TIMEOUT_MS = 4000;
+      // ====== PERBAIKAN OFFLINE #2 ======
+      // SEBELUMNYA: kalau internet mati berjam-jam, layar cuma menampilkan overlay
+      // "Menyambungkan kembali ke siaran langsung…" TANPA HENTI di atas video hitam -
+      // padahal fitur screensaver ilustrasi sudah ada, tapi cuma dipakai kalau admin
+      // MANUAL mematikan live streaming dari menu Pengaturan.
+      // SEKARANG: begitu koneksi terdeteksi buruk lebih lama dari
+      // AUTO_SCREENSAVER_AFTER_MS, otomatis pindah ke screensaver (tanpa mengubah
+      // state.bgStream tersimpan) supaya layar tetap enak dilihat jamaah, dan otomatis
+      // kembali ke live streaming begitu koneksi pulih (lewat renderBgStream() yang
+      // sudah dipanggil di jalur recovery).
+      const AUTO_SCREENSAVER_AFTER_MS = 45000; // 45 detik offline -> auto screensaver
+      // connKnownGood: status konektivitas yang SUDAH DIKONFIRMASI (bukan asumsi).
+      // Sengaja dimulai dari `false` (pesimis) walau navigator.onLine bisa saja
+      // `true` — karena navigator.onLine cuma menandakan device tersambung ke
+      // sebuah jaringan (mis. WiFi lokal), BUKAN berarti internet-nya benar-benar
+      // hidup. renderBgStream() memakai flag ini untuk memutuskan apakah aman
+      // memuat iframe YouTube atau harus tetap di screensaver dulu.
+      let connKnownGood = false;
       let connBad = false;
+      let connBadSinceTs = null;
       let connOverlayVisible = false;
       let reconnectReloadTimer = null;
 
@@ -1885,26 +1898,34 @@
       }
 
       function handleConnResult(ok) {
+        const belumPernahOnline = !connKnownGood;
+        connKnownGood = ok;
+
         if (state.bgStream !== 'on') { setConnOverlay(false); return; } // streaming nonaktif, tidak relevan
+
         if (ok) {
-          if (connBad) {
-            // Baru pulih dari koneksi buruk -> muat ulang stream biar sinkron kembali,
-            // dan sekalian coba pulihkan audio diam-diam (device kemungkinan baru saja
-            // menyala/tersambung kembali setelah mati listrik/putus koneksi).
+          if (connBad || belumPernahOnline) {
+            // Baru pulih dari koneksi buruk, ATAU ini konfirmasi online PERTAMA
+            // sejak halaman dibuka -> (re)muat iframe live streaming.
             connBad = false;
+            connBadSinceTs = null;
             attemptSilentResume();
             clearTimeout(reconnectReloadTimer);
             reconnectReloadTimer = setTimeout(() => {
-              renderBgStream();
+              renderBgStream(); // ini juga otomatis stopScreensaver() kalau screensaver sempat aktif
               setConnOverlay(false);
             }, 2500);
           } else {
             setConnOverlay(false);
           }
         } else {
+          if (!connBadSinceTs) connBadSinceTs = getNow().getTime();
           connBad = true;
           clearTimeout(reconnectReloadTimer);
           setConnOverlay(true);
+          if (getNow().getTime() - connBadSinceTs > AUTO_SCREENSAVER_AFTER_MS) {
+            startScreensaver();
+          }
         }
       }
 
@@ -1942,15 +1963,11 @@
         return (name === 'Dzuhur' && isJumatToday(date)) ? 'Jumat' : name;
       }
 
-      // Nilai jeda ASLI yang tersimpan di pengaturan (dipakai untuk mengisi form Pengaturan,
-      // supaya field "Dzuhur" tetap menampilkan nilai hari-biasa meski hari ini kebetulan Jumat).
       function getRawIqomahDelay(name) {
         const v = state.iqomahDelay && state.iqomahDelay[name];
         return (typeof v === 'number' && !isNaN(v)) ? v : 0;
       }
 
-      // Nilai jeda EFEKTIF yang dipakai jam berjalan: kalau ini hari Jumat dan sedang
-      // menghitung "Dzuhur", pakai jeda khutbah Jumat, bukan jeda iqomah Dzuhur biasa.
       function getIqomahDelay(name) {
         if (name === 'Dzuhur' && isJumatToday()) {
           const jk = Number(state.jumatKhutbahMinutes);
@@ -1983,8 +2000,6 @@
         return minutesOfDay(todayTimes[name]) + getIqomahDelay(name);
       }
 
-      // Menentukan event shalat berikutnya: bisa berupa waktu ADZAN atau waktu IQOMAH
-      // (jika kita sedang berada dalam jeda antara adzan dan iqomah suatu shalat).
       function getNextPrayerEvent(now) {
         const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
@@ -2001,13 +2016,6 @@
         return { name: "Subuh", minutes: minutesOfDay(todayTimes["Subuh"]) + 1440, phase: 'adzan', tomorrow: true };
       }
 
-      // playBeep(kind) mengembalikan Promise yang resolve dengan:
-      //   true   -> beep berhasil dimainkan
-      //   false  -> beep GAGAL dimainkan (browser memblokir AudioContext / error lain)
-      //   null   -> tidak dicoba sama sekali karena pengaturan suara memang dinonaktifkan
-      // kind: 'azan' | 'iqomah' | 'test-azan' | 'test-iqomah'
-      // Nada azan (880Hz, 3x) sengaja dibedakan dari nada iqomah (660Hz, 2x, jeda lebih
-      // panjang) supaya pengurus bisa membedakan keduanya cukup dari telinga.
       function playBeep(kind) {
         const isRealTrigger = (kind === 'azan' || kind === 'iqomah');
         if (isRealTrigger && state.sound !== 'on') {
@@ -2084,8 +2092,6 @@
         $('adzanOverlay').classList.remove('iqomah-mode');
         $('adzanText').textContent = `WAKTU SHALAT ${displayName.toUpperCase()} TELAH TIBA`;
 
-        // Notifikasi tetap tampil selama jeda adzan -> iqomah waktu shalat ini
-        // (sesuai pengaturan menit iqomah masing-masing di menu Pengaturan), lalu tertutup otomatis.
         const iqomahDelayMin = getIqomahDelay(prayerName);
         if (IQOMAH_PRAYERS.includes(prayerName) && iqomahDelayMin > 0) {
           $('adzanSub').textContent = isJumat ? 'Mari bersiap menuju Sholat Jumat' : 'Mari tunaikan shalat berjamaah';
@@ -2099,7 +2105,7 @@
           iqomahCountdownTarget = null;
           $('adzanTimerLabel').style.display = 'none';
           $('adzanTimer').classList.remove('show');
-          scheduleAutoHide(); // fallback ke durasi umum jika iqomah tidak diset / bukan shalat berjamaah (mis. Imsak)
+          scheduleAutoHide();
         }
 
         $('adzanOverlay').classList.add('show');
@@ -2153,7 +2159,7 @@
             console.log(`[Cek Beep] Iqomah ${displayName}: suara memang dinonaktifkan di pengaturan`);
           }
         });
-        scheduleAutoHide(); // notifikasi iqomah tetap pakai durasi umum (bukan interval adzan)
+        scheduleAutoHide();
       }
 
       function updateClock() {
@@ -2164,9 +2170,6 @@
 
         updateAdzanTimerDisplay();
 
-        // Tanggal berganti (mis. lewat tengah malam) -> hitung ulang waktu shalat hari ini
-        // supaya akurat (bukan sekadar +1440 menit dari hari sebelumnya), sekaligus
-        // memperbarui label kartu "Jumat" jika berlaku.
         if (todayTimes && now.toDateString() !== lastComputedDateStr) {
           refreshPrayerTimes();
         }
@@ -2207,7 +2210,6 @@
           }
         });
 
-        // Cek pemicu notifikasi IQOMAH berdasarkan menit iqomah masing-masing shalat
         IQOMAH_PRAYERS.forEach(name => {
           const iqMinTotal = getIqomahMinutes(name);
           const iqH = Math.floor(iqMinTotal / 60) % 24;
@@ -2242,7 +2244,6 @@
         const tickerTrack = $('tickerTrack');
         tickerTrack.innerHTML = '';
 
-        // Tampilkan Laporan Kas jika diaktifkan
         if (state.showKas === 'on') {
           const awal = Number(state.kasAwal) || 0;
           const masuk = Number(state.kasMasuk) || 0;
@@ -2270,10 +2271,6 @@
         applyTickerSpeeds();
       }
 
-      // Mengatur kecepatan teks berjalan (px/detik) berdasarkan panjang teks aktual,
-      // supaya kecepatan yang dirasakan konsisten meski jumlah info/ticker berubah-ubah
-      // (kalau durasi animasi dipatok tetap, teks yang lebih panjang akan terasa lebih cepat
-      // dan teks yang lebih pendek terasa lebih lambat).
       function applyTickerSpeeds() {
         const speed = Math.max(10, Number(state.tickerSpeed) || 80); // px per detik
         [$('petugasTrack'), $('tickerTrack')].forEach(track => {
@@ -2287,8 +2284,6 @@
 
       let tickerResizeTimer = null;
       window.addEventListener('resize', () => {
-        // Lebar container ikut memengaruhi jarak scroll (padding-left:100%),
-        // jadi dihitung ulang saat ukuran layar berubah (debounce ringan).
         clearTimeout(tickerResizeTimer);
         tickerResizeTimer = setTimeout(applyTickerSpeeds, 200);
       });
@@ -2391,7 +2386,6 @@
         });
       }
 
-      // Event Listeners
       function openSettingsModal() {
         populateModalFields();
         $('modalBg').classList.add('show');
@@ -2413,7 +2407,6 @@
       $('gearBtn').addEventListener('click', () => {
         const pin = (state.adminPin || '').trim();
         if (!pin) {
-          // Tidak ada PIN yang diset -> langsung buka Pengaturan seperti biasa
           openSettingsModal();
           return;
         }
@@ -2557,6 +2550,11 @@
       });
 
       // Init
+      // checkConnection() dipanggil PALING AWAL (sebelum loadState()) supaya
+      // connKnownGood sudah mulai diperiksa sedini mungkin -> jendela waktu di mana
+      // renderBgStream() masih menganggap koneksi "belum diketahui" (dan karenanya
+      // memilih screensaver) sesingkat mungkin.
+      checkConnection();
       syncServerTime();
       loadState();
       updateClock();
@@ -2564,28 +2562,19 @@
       checkConnection();
       setInterval(checkConnection, CONN_CHECK_INTERVAL_MS);
 
-      // Pengecekan cepat status AudioContext tiap 5 detik (hanya membaca status,
-      // supaya ikon 🔔 di header selalu akurat tanpa membebani).
       setInterval(() => {
         setSoundStatusIcon(!!sharedAudioCtx && sharedAudioCtx.state === 'running');
       }, 5000);
 
-      // Auto-recover aktif: coba pulihkan audio secara diam-diam (tanpa bunyi) setiap
-      // beberapa menit sebagai jaring pengaman berkala...
       const SILENT_RESUME_INTERVAL_MS = 2 * 60 * 1000; // tiap 2 menit
       setInterval(attemptSilentResume, SILENT_RESUME_INTERVAL_MS);
 
-      // ...dan segera dicoba ulang setiap kali halaman ini kembali terlihat/aktif —
-      // ini momen paling penting: layar TV/tablet baru dinyalakan lagi, atau tab
-      // sempat pindah ke background lalu kembali. Tidak menunggu 2 menit lagi.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') attemptSilentResume();
       });
       window.addEventListener('focus', attemptSilentResume);
       window.addEventListener('pageshow', attemptSilentResume);
 
-      // Percobaan pertama begitu skrip dimuat (menyusul percobaan via interaksi user
-      // yang sudah ditangani unlockAudio di listener click/touchstart/keydown).
       attemptSilentResume();
 
     })();

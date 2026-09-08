@@ -1816,6 +1816,27 @@
           return;
         }
 
+        // ====== PERBAIKAN OFFLINE #3 ======
+        // SEBELUMNYA: iframe YouTube langsung diberi src walau koneksi belum tentu
+        // ada. Kalau device offline, BROWSER SENDIRI menampilkan halaman error
+        // jaringan bawaannya (mis. "Looks like there's a problem with your internet
+        // connection") DI DALAM iframe itu — dan karena iframe ini sengaja dibuat
+        // memenuhi hampir seluruh layar (lihat .bg-video-inner), halaman error itu
+        // terlihat seperti seluruh tampilan jam rusak, bukan cuma video yang gagal.
+        // Overlay "menyambungkan kembali" yang menutupinya baru sempat terpasang
+        // SETELAH percobaan koneksi gagal terdeteksi, jadi ada jeda singkat di mana
+        // halaman error sempat "kebentur" tampil duluan.
+        // SEKARANG: iframe YouTube TIDAK PERNAH diberi src sama sekali sebelum
+        // koneksi internet benar-benar terkonfirmasi baik (connKnownGood === true).
+        // Selama status belum terkonfirmasi (termasuk sesaat setelah halaman baru
+        // dibuka), tampilan pakai screensaver — jadi tidak ada celah bagi browser
+        // untuk sempat menampilkan halaman error jaringannya sendiri.
+        if (!connKnownGood) {
+          startScreensaver();
+          btn.classList.remove('off'); // live streaming tetap "diinginkan aktif", cuma menunggu koneksi
+          return;
+        }
+
         stopScreensaver();
 
         const customId = extractYoutubeId(state.liveCustomUrl);
@@ -1857,6 +1878,13 @@
       // kembali ke live streaming begitu koneksi pulih (lewat renderBgStream() yang
       // sudah dipanggil di jalur recovery).
       const AUTO_SCREENSAVER_AFTER_MS = 45000; // 45 detik offline -> auto screensaver
+      // connKnownGood: status konektivitas yang SUDAH DIKONFIRMASI (bukan asumsi).
+      // Sengaja dimulai dari `false` (pesimis) walau navigator.onLine bisa saja
+      // `true` — karena navigator.onLine cuma menandakan device tersambung ke
+      // sebuah jaringan (mis. WiFi lokal), BUKAN berarti internet-nya benar-benar
+      // hidup. renderBgStream() memakai flag ini untuk memutuskan apakah aman
+      // memuat iframe YouTube atau harus tetap di screensaver dulu.
+      let connKnownGood = false;
       let connBad = false;
       let connBadSinceTs = null;
       let connOverlayVisible = false;
@@ -1870,9 +1898,15 @@
       }
 
       function handleConnResult(ok) {
+        const belumPernahOnline = !connKnownGood;
+        connKnownGood = ok;
+
         if (state.bgStream !== 'on') { setConnOverlay(false); return; } // streaming nonaktif, tidak relevan
+
         if (ok) {
-          if (connBad) {
+          if (connBad || belumPernahOnline) {
+            // Baru pulih dari koneksi buruk, ATAU ini konfirmasi online PERTAMA
+            // sejak halaman dibuka -> (re)muat iframe live streaming.
             connBad = false;
             connBadSinceTs = null;
             attemptSilentResume();
@@ -2516,6 +2550,11 @@
       });
 
       // Init
+      // checkConnection() dipanggil PALING AWAL (sebelum loadState()) supaya
+      // connKnownGood sudah mulai diperiksa sedini mungkin -> jendela waktu di mana
+      // renderBgStream() masih menganggap koneksi "belum diketahui" (dan karenanya
+      // memilih screensaver) sesingkat mungkin.
+      checkConnection();
       syncServerTime();
       loadState();
       updateClock();
