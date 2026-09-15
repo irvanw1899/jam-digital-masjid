@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
   <title>Jam Digital Waktu Shalat</title>
+  <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
@@ -2029,8 +2031,21 @@
             const ctx = sharedAudioCtx;
             const isIqomah = (kind === 'iqomah' || kind === 'test-iqomah');
             const freq = isIqomah ? 660 : 880;
-            const beepCount = isIqomah ? 2 : 3;
-            const gapSec = isIqomah ? 0.45 : 0.35;
+            // ====== BEEP DIPERKENCANG & DIPERPANJANG ======
+            // Sebelumnya: gain puncak cuma 0.18 (pelan) dan tiap nada berdurasi
+            // ~0.3 detik (pendek, gampang kelewat kalau lagi ramai/berisik).
+            // Sekarang: gain puncak dinaikkan ke 0.6 (jauh lebih kencang), tiap
+            // nada diperpanjang jadi lebih dari setengah detik, jumlah bunyi
+            // ditambah (bukan cuma jarak antar-bunyi yang dilebarkan), dan
+            // gelombang diganti dari 'sine' (halus/lembut) ke 'triangle' (lebih
+            // "berisi"/nge-bass sedikit, secara persepsi kedengaran lebih kencang
+            // di volume speaker yang sama). Adzan (3 nada tinggi awalnya) jadi
+            // 4x nada lebih panjang; Iqomah (2 nada rendah) jadi 3x nada lebih
+            // panjang — keduanya tetap dibedakan lewat frekuensi & jumlah bunyi.
+            const beepCount = isIqomah ? 3 : 4;
+            const beepDurSec = isIqomah ? 0.65 : 0.55;
+            const gapSec = isIqomah ? 0.85 : 0.75;
+            const peakGain = 0.6;
 
             const startSequence = () => {
               const now0 = ctx.currentTime;
@@ -2038,15 +2053,15 @@
                 const t = i * gapSec;
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.type = 'sine';
+                osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now0 + t);
                 gain.gain.setValueAtTime(0.0001, now0 + t);
-                gain.gain.exponentialRampToValueAtTime(0.18, now0 + t + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now0 + t + 0.3);
+                gain.gain.exponentialRampToValueAtTime(peakGain, now0 + t + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now0 + t + beepDurSec);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 osc.start(now0 + t);
-                osc.stop(now0 + t + 0.32);
+                osc.stop(now0 + t + beepDurSec + 0.03);
               }
               setSoundStatusIcon(true);
               resolve(true);
@@ -2578,6 +2593,11 @@
       attemptSilentResume();
 
     })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
   </script>
 </body>
 

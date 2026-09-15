@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.JamMasjid" parent="Theme.AppCompat.NoActionBar" />
+
+    <style name="Theme.JamMasjid.Fullscreen" parent="Theme.JamMasjid">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>
