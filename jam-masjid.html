@@ -1052,6 +1052,13 @@
         <div><label>Selisih Imsak sebelum Subuh (menit)</label><input type="number" id="inImsak"></div>
         <div><label>Ihtiyat / koreksi pengaman (menit)</label><input type="number" id="inIhtiyat"></div>
       </div>
+      <div class="row2">
+        <div><label>Koreksi tanggal Hijriyah (hari, boleh minus)</label><input type="number" id="inHijriOffset"
+            step="1"></div>
+      </div>
+      <div class="status-note" style="margin-top:-8px;margin-bottom:14px;">Isi +1 atau -1 kalau tanggal Hijriyah di
+        layar berbeda dari pengumuman resmi Kemenag/rukyat setempat. Perhitungan dasar pakai kalender tabular,
+        kadang perlu koreksi 1 hari saat pergantian bulan.</div>
 
       <!-- FITUR JEDA ADZAN - IQOMAH -->
       <div class="iqomah-box">
@@ -1213,6 +1220,7 @@
         lat: -6.1862, lng: 106.8347, tz: 7,
         fajrAngle: 20, ishaAngle: 18, imsakMinutes: 10,
         ihtiyat: 3,
+        hijriOffset: 1, // dikalibrasi ke Kalender Hijriah Indonesia Kemenag per 15 Sep 2026
         asrMethod: 1,
         sound: "on",
         notifDurationSec: 45,
@@ -1513,10 +1521,48 @@
         };
       }
 
-      function hijriDate(date) {
+      // Kalender Hijriyah dihitung manual (rumus tabular Islamic calendar),
+      // TIDAK bergantung pada Intl/ICU browser. Ini sengaja dipakai karena
+      // dukungan kalender "islamic" di Intl.DateTimeFormat tidak konsisten
+      // antar-device (terutama Android WebView di TV box dengan data ICU
+      // terbatas), dan sering beda 1-2 hari dari penetapan resmi.
+      // state.hijriOffset (diisi lewat menu Pengaturan) dipakai untuk
+      // mengoreksi manual ke pengumuman resmi Kemenag/rukyat setempat.
+      const HIJRI_MONTHS_ID = [
+        'Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir',
+        'Jumadil Awal', 'Jumadil Akhir', 'Rajab', "Sya'ban",
+        'Ramadhan', 'Syawal', "Dzulqa'dah", 'Dzulhijjah'
+      ];
+
+      function gregorianToJDN(y, m, d) {
+        const a = Math.floor((14 - m) / 12);
+        const y2 = y + 4800 - a;
+        const m2 = m + 12 * a - 3;
+        return d + Math.floor((153 * m2 + 2) / 5) + 365 * y2 + Math.floor(y2 / 4)
+          - Math.floor(y2 / 100) + Math.floor(y2 / 400) - 32045;
+      }
+
+      function jdnToHijri(jdnInput) {
+        let jdn = jdnInput - 1948440 + 10632;
+        const n = Math.floor((jdn - 1) / 10631);
+        jdn = jdn - 10631 * n + 354;
+        const j = Math.floor((10985 - jdn) / 5316) * Math.floor((50 * jdn) / 17719)
+          + Math.floor(jdn / 5670) * Math.floor((43 * jdn) / 15238);
+        jdn = jdn - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50)
+          - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+        const month = Math.floor((24 * jdn) / 709);
+        const day = jdn - Math.floor((709 * month) / 24);
+        const year = 30 * n + j - 30;
+        return { year, month, day };
+      }
+
+      function hijriDate(date, offsetDays) {
         try {
-          const f = new Intl.DateTimeFormat('id-ID-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' });
-          return f.format(date) + ' H';
+          const off = Number.isFinite(offsetDays) ? offsetDays : 0;
+          const jdn = gregorianToJDN(date.getFullYear(), date.getMonth() + 1, date.getDate()) + off;
+          const h = jdnToHijri(jdn);
+          const monthName = HIJRI_MONTHS_ID[h.month - 1] || '';
+          return `${h.day} ${monthName} ${h.year} H`;
         } catch (e) { return ''; }
       }
 
@@ -2181,7 +2227,7 @@
         const now = getNow();
         $('bigClock').textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
         $('dateMasehi').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        $('dateHijri').textContent = hijriDate(now);
+        $('dateHijri').textContent = hijriDate(now, state.hijriOffset);
 
         updateAdzanTimerDisplay();
 
@@ -2323,6 +2369,7 @@
         $('inIsha').value = state.ishaAngle;
         $('inImsak').value = state.imsakMinutes;
         $('inIhtiyat').value = state.ihtiyat;
+        $('inHijriOffset').value = state.hijriOffset !== undefined ? state.hijriOffset : 0;
         $('inBgStream').value = state.bgStream;
         $('inLiveCustomUrl').value = state.liveCustomUrl || '';
         $('inSound').value = state.sound;
@@ -2532,6 +2579,7 @@
         state.ishaAngle = parseFloat($('inIsha').value) || 18;
         state.imsakMinutes = parseInt($('inImsak').value) || 10;
         state.ihtiyat = parseInt($('inIhtiyat').value) || 0;
+        state.hijriOffset = parseInt($('inHijriOffset').value) || 0;
         state.bgStream = $('inBgStream').value;
         state.liveChannelId = $('inLiveChannel').value;
         state.liveCustomUrl = $('inLiveCustomUrl').value.trim();

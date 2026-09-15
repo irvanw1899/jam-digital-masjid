@@ -1139,9 +1139,26 @@
         <option value="on">Aktif</option>
         <option value="off">Nonaktif</option>
       </select>
+
+      <label style="margin-top:14px;">Jenis Notifikasi Suara</label>
+      <select id="inNotifVoiceMode">
+        <option value="beep">Bip saja (default)</option>
+        <option value="voice">Suara bicara saja ("Perhatian, sudah masuk waktu...")</option>
+        <option value="both">Bip + Suara bicara</option>
+      </select>
+      <div class="status-note" style="margin-top:4px">Suara bicara pakai mesin Text-to-Speech bawaan
+        perangkat/browser (tidak butuh file audio tambahan). Kualitas & ketersediaannya tergantung TV/box-nya —
+        Android TV umumnya perlu app "Google Text-to-speech" terpasang + paket suara Bahasa Indonesia sudah
+        diunduh (cek di Settings TV &gt; Text-to-speech). Kalau tidak ada suara Indonesia sama sekali, coba tombol
+        tes di bawah — jika tidak terdengar, pasang/unduh paket suaranya dulu di TV.</div>
+
       <div class="row2" style="margin-top:8px;">
         <button class="btn ghost" type="button" id="testBeepAzan">🔊 Tes Beep Adzan</button>
         <button class="btn ghost" type="button" id="testBeepIqomah">🔊 Tes Beep Iqomah</button>
+      </div>
+      <div class="row2" style="margin-top:8px;">
+        <button class="btn ghost" type="button" id="testVoiceAzan">🗣 Tes Suara Adzan</button>
+        <button class="btn ghost" type="button" id="testVoiceIqomah">🗣 Tes Suara Iqomah</button>
       </div>
       <div class="status-note" style="margin-top:4px">Gunakan tombol tes untuk memastikan perangkat ini benar-benar
         mengeluarkan suara. Nada Adzan (3x, nada tinggi) dan Iqomah (2x, nada lebih rendah) sengaja dibedakan supaya
@@ -1223,6 +1240,7 @@
         hijriOffset: 1, // dikalibrasi ke Kalender Hijriah Indonesia Kemenag per 15 Sep 2026
         asrMethod: 1,
         sound: "on",
+        notifVoiceMode: "beep",
         notifDurationSec: 45,
         bgStream: "on",
         liveChannelId: "MakkahLoop",
@@ -2048,11 +2066,23 @@
         return minutesOfDay(todayTimes[name]) + getIqomahDelay(name);
       }
 
+      // Urutan pengecekan "waktu berikutnya" untuk kartu yang aktif +
+      // hitung mundur. Syuruq disisipkan di antara Subuh & Dzuhur supaya
+      // kartunya juga dapat giliran aktif/countdown seperti waktu shalat —
+      // tapi TIDAK ada fase iqomah untuknya (bukan waktu shalat).
+      const NEXT_EVENT_ORDER = ["Subuh", "Syuruq", "Dzuhur", "Ashar", "Maghrib", "Isya"];
+
       function getNextPrayerEvent(now) {
         const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
-        for (const name of IQOMAH_PRAYERS) {
+        for (const name of NEXT_EVENT_ORDER) {
           const adzanMin = minutesOfDay(todayTimes[name]);
+          if (!IQOMAH_PRAYERS.includes(name)) {
+            if (nowMin < adzanMin) {
+              return { name, minutes: adzanMin, phase: 'adzan' };
+            }
+            continue;
+          }
           const iqomahMin = getIqomahMinutes(name);
           if (nowMin < adzanMin) {
             return { name, minutes: adzanMin, phase: 'adzan' };
@@ -2132,6 +2162,62 @@
         });
       }
 
+      // ====== TEXT-TO-SPEECH (suara bicara pengganti/pelengkap bip) ======
+      // Pakai Web Speech API bawaan browser (tidak butuh file audio/server).
+      // Kualitas & ketersediaan suara Bahasa Indonesia tergantung TTS engine
+      // yang terpasang di device (di Android biasanya "Google Text-to-speech"
+      // — kalau TV box tidak punya app itu + paket suara Indonesia terunduh,
+      // suara bisa tidak keluar sama sekali atau memakai logat lain).
+      let cachedVoices = [];
+      function refreshVoiceList() {
+        try { cachedVoices = window.speechSynthesis.getVoices() || []; } catch (e) { cachedVoices = []; }
+      }
+      if ('speechSynthesis' in window) {
+        refreshVoiceList();
+        window.speechSynthesis.onvoiceschanged = refreshVoiceList;
+      }
+
+      function pickIndonesianVoice() {
+        return cachedVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('id')) || null;
+      }
+
+      function speakText(text) {
+        return new Promise((resolve) => {
+          try {
+            if (!('speechSynthesis' in window)) { resolve(false); return; }
+            window.speechSynthesis.cancel(); // hentikan antrian sebelumnya biar tidak numpuk
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'id-ID';
+            utter.rate = 0.95;
+            utter.pitch = 1.0;
+            utter.volume = 1.0;
+            const idVoice = pickIndonesianVoice();
+            if (idVoice) utter.voice = idVoice;
+            utter.onend = () => resolve(true);
+            utter.onerror = () => resolve(false);
+            window.speechSynthesis.speak(utter);
+          } catch (e) { resolve(false); }
+        });
+      }
+
+      // Mainkan beep dan/atau suara bicara sesuai state.notifVoiceMode.
+      // Return promise yang resolve true kalau minimal salah satu berhasil.
+      function playNotificationSound(beepKind, speechText) {
+        const isRealTrigger = (beepKind === 'azan' || beepKind === 'iqomah');
+        if (isRealTrigger && state.sound !== 'on') return Promise.resolve(null);
+        const mode = state.notifVoiceMode || 'beep';
+        const doBeep = mode === 'beep' || mode === 'both';
+        const doVoice = mode === 'voice' || mode === 'both';
+        const tasks = [];
+        if (doBeep) tasks.push(playBeep(beepKind));
+        if (doVoice) tasks.push(speakText(speechText));
+        if (tasks.length === 0) return Promise.resolve(null);
+        return Promise.all(tasks).then(results => {
+          if (results.every(r => r === null)) return null;
+          return results.some(r => r === true);
+        });
+      }
+
       function scheduleAutoHide(durationSecOverride) {
         if (adzanHideTimer) clearTimeout(adzanHideTimer);
         const durationSec = (typeof durationSecOverride === 'number' && durationSecOverride > 0)
@@ -2170,15 +2256,18 @@
         }
 
         $('adzanOverlay').classList.add('show');
-        playBeep('azan').then(ok => {
+        const adzanSpeech = isJumat
+          ? `Perhatian, sudah masuk waktu Sholat Jumat`
+          : `Perhatian, sudah masuk waktu Adzan ${displayName}`;
+        playNotificationSound('azan', adzanSpeech).then(ok => {
           if (ok === true) {
-            console.log(`[Cek Beep] Adzan ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
-            showBeepToast(true, `🔊 Beep Adzan ${displayName} dimainkan`);
+            console.log(`[Cek Suara] Adzan ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
+            showBeepToast(true, `🔊 Notifikasi Adzan ${displayName} dimainkan`);
           } else if (ok === false) {
-            console.warn(`[Cek Beep] Adzan ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
-            showBeepToast(false, `⚠ Beep Adzan ${displayName} GAGAL — audio diblokir browser`);
+            console.warn(`[Cek Suara] Adzan ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
+            showBeepToast(false, `⚠ Notifikasi Adzan ${displayName} GAGAL — audio diblokir browser`);
           } else {
-            console.log(`[Cek Beep] Adzan ${displayName}: suara memang dinonaktifkan di pengaturan`);
+            console.log(`[Cek Suara] Adzan ${displayName}: suara memang dinonaktifkan di pengaturan`);
           }
         });
       }
@@ -2209,15 +2298,18 @@
         $('adzanTimerLabel').style.display = 'none';
         $('adzanTimer').classList.remove('show');
         $('adzanOverlay').classList.add('show');
-        playBeep('iqomah').then(ok => {
+        const iqomahSpeech = isJumat
+          ? `Perhatian, Sholat Jumat segera didirikan`
+          : `Perhatian, sudah masuk waktu Iqomah ${displayName}`;
+        playNotificationSound('iqomah', iqomahSpeech).then(ok => {
           if (ok === true) {
-            console.log(`[Cek Beep] Iqomah ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
-            showBeepToast(true, `🔊 Beep Iqomah ${displayName} dimainkan`);
+            console.log(`[Cek Suara] Iqomah ${displayName}: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
+            showBeepToast(true, `🔊 Notifikasi Iqomah ${displayName} dimainkan`);
           } else if (ok === false) {
-            console.warn(`[Cek Beep] Iqomah ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
-            showBeepToast(false, `⚠ Beep Iqomah ${displayName} GAGAL — audio diblokir browser`);
+            console.warn(`[Cek Suara] Iqomah ${displayName}: GAGAL dimainkan (browser memblokir audio otomatis)`);
+            showBeepToast(false, `⚠ Notifikasi Iqomah ${displayName} GAGAL — audio diblokir browser`);
           } else {
-            console.log(`[Cek Beep] Iqomah ${displayName}: suara memang dinonaktifkan di pengaturan`);
+            console.log(`[Cek Suara] Iqomah ${displayName}: suara memang dinonaktifkan di pengaturan`);
           }
         });
         scheduleAutoHide();
@@ -2373,6 +2465,7 @@
         $('inBgStream').value = state.bgStream;
         $('inLiveCustomUrl').value = state.liveCustomUrl || '';
         $('inSound').value = state.sound;
+        $('inNotifVoiceMode').value = state.notifVoiceMode || 'beep';
         $('inNotifDuration').value = state.notifDurationSec !== undefined ? state.notifDurationSec : 45;
         $('inPetugasLabel').value = state.petugasLabel;
         $('inTickerSpeed').value = state.tickerSpeed !== undefined ? state.tickerSpeed : 80;
@@ -2521,6 +2614,22 @@
         });
       });
 
+      $('testVoiceAzan').addEventListener('click', () => {
+        speakText('Perhatian, sudah masuk waktu Adzan Subuh').then(ok => {
+          showBeepToast(ok, ok
+            ? '🗣 Tes suara Adzan diputar — terdengar?'
+            : '⚠ Tes suara gagal — cek apakah TV punya Text-to-speech Bahasa Indonesia terpasang');
+        });
+      });
+
+      $('testVoiceIqomah').addEventListener('click', () => {
+        speakText('Perhatian, sudah masuk waktu Iqomah Subuh').then(ok => {
+          showBeepToast(ok, ok
+            ? '🗣 Tes suara Iqomah diputar — terdengar?'
+            : '⚠ Tes suara gagal — cek apakah TV punya Text-to-speech Bahasa Indonesia terpasang');
+        });
+      });
+
       $('adzanClose').addEventListener('click', () => {
         $('adzanOverlay').classList.remove('show');
         $('adzanOverlay').classList.remove('iqomah-mode');
@@ -2584,6 +2693,7 @@
         state.liveChannelId = $('inLiveChannel').value;
         state.liveCustomUrl = $('inLiveCustomUrl').value.trim();
         state.sound = $('inSound').value;
+        state.notifVoiceMode = $('inNotifVoiceMode').value;
         state.notifDurationSec = Math.max(5, parseInt($('inNotifDuration').value) || 45);
         state.petugasLabel = $('inPetugasLabel').value.trim() || "INFO KEGIATAN";
         state.tickerSpeed = Math.max(10, parseInt($('inTickerSpeed').value) || 80);
