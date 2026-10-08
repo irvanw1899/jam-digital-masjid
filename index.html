@@ -1211,10 +1211,8 @@
   <script>
     (function () {
       const LIVE_CHANNEL_OPTIONS = [
-        { id: "MakkahLoop", videoId: "bNY8a2BB5Gc", type: "video", label: "Makkah Live / Video HD (Stabil)" },
-        { id: "MadinahLoop", videoId: "rHWSRMcGGBQ", type: "video", label: "Madinah Live / Video HD (Stabil)" },
-        { id: "UCos52azQNBgW63_9uDJoPDA", type: "channel", label: "KSA Qur'an TV (Live Official)" },
-        { id: "UCIsVsnu6C9EPnN7zkq0RNfA", type: "channel", label: "Haramain Live (Live Cadangan)" }
+        { id: "MakkahLoop", channelId: "UCos52azQNBgW63_9uDJoPDA", type: "channel", label: "Kanal Resmi Al-Qur'an — Makkah" },
+        { id: "MadinahLoop", channelId: "UCROKYPep-UuODNwyipe6JMw", type: "channel", label: "Kanal Resmi As-Sunnah — Madinah" }
       ];
 
       const JABODETABEK_PRESETS = {
@@ -1921,7 +1919,7 @@
           if (selected.type === 'video') {
             src = `https://www.youtube.com/embed/${selected.videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${selected.videoId}&enablejsapi=1`;
           } else {
-            src = `https://www.youtube.com/embed/live_stream?channel=${selected.id}&autoplay=1&mute=1&controls=0&enablejsapi=1`;
+            src = `https://www.youtube.com/embed/live_stream?channel=${selected.channelId}&autoplay=1&mute=1&controls=0&enablejsapi=1`;
           }
         }
 
