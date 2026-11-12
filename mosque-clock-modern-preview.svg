@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">Konsep modern jam digital masjid</title>
+  <desc id="description">Pratinjau layar jam digital masjid dengan tema malam emerald dan emas, informasi waktu, siaran latar, dan jadwal shalat.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#081622"/>
+      <stop offset=".56" stop-color="#12322f"/>
+      <stop offset="1" stop-color="#071411"/>
+    </linearGradient>
+    <radialGradient id="horizon" cx=".5" cy=".72" r=".7">
+      <stop offset="0" stop-color="#d8a54b" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#d8a54b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#10201f" stop-opacity=".89"/>
+      <stop offset="1" stop-color="#091311" stop-opacity=".94"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffe4a0"/>
+      <stop offset="1" stop-color="#d79c3a"/>
+    </linearGradient>
+    <linearGradient id="active" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#f0c66c"/>
+      <stop offset="1" stop-color="#d19a3e"/>
+    </linearGradient>
+    <filter id="shadow" x="-.2" y="-.2" width="1.4" height="1.5">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dy="8"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".28"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="stars" width="190" height="150" patternUnits="userSpaceOnUse">
+      <circle cx="18" cy="24" r="1.4" fill="#fff" opacity=".6"/>
+      <circle cx="90" cy="62" r="1" fill="#ffe4a0" opacity=".56"/>
+      <circle cx="152" cy="30" r="1.2" fill="#fff" opacity=".5"/>
+      <circle cx="49" cy="112" r=".9" fill="#fff" opacity=".45"/>
+      <circle cx="171" cy="122" r="1" fill="#ffe4a0" opacity=".48"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="#050b0a"/>
+  <rect x="18" y="18" width="1564" height="864" rx="26" fill="#0b1412" stroke="#d7a64e" stroke-opacity=".3"/>
+
+  <rect x="19" y="19" width="1562" height="126" rx="25" fill="#0b1715"/>
+  <path d="M20 143H1580" stroke="#d9aa56" stroke-opacity=".34"/>
+  <text x="66" y="61" fill="#d8c9a7" font-family="Arial, sans-serif" font-size="17" letter-spacing="3">MASJID BASMATUL IMAN</text>
+  <text x="66" y="91" fill="#8fa59c" font-family="Arial, sans-serif" font-size="15" letter-spacing="1.3">JAKARTA PUSAT · DKI JAKARTA</text>
+  <circle cx="68" cy="119" r="4" fill="#67d5a5"/>
+  <text x="82" y="124" fill="#91b9a7" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">LIVE STREAM AKTIF</text>
+
+  <text x="785" y="100" text-anchor="middle" fill="#fff8e9" font-family="Arial, sans-serif" font-size="64" font-weight="300" letter-spacing="4">04:38</text>
+  <text x="786" y="124" text-anchor="middle" fill="#aab9ae" font-family="Arial, sans-serif" font-size="13" letter-spacing="1.2">KAMIS, 12 NOVEMBER 2026</text>
+
+  <text x="1396" y="62" text-anchor="middle" fill="#efcf8b" font-family="Arial, sans-serif" font-size="20">١ جمادى الآخرة ١٤٤٨ هـ</text>
+  <text x="1396" y="92" text-anchor="middle" fill="#d7c7a2" font-family="Arial, sans-serif" font-size="15">1 Jumadil Akhir 1448 H</text>
+  <rect x="1325" y="108" width="142" height="25" rx="12.5" fill="#172822" stroke="#d8ae5b" stroke-opacity=".4"/>
+  <circle cx="1343" cy="120.5" r="4" fill="#eac16e"/>
+  <text x="1399" y="125" text-anchor="middle" fill="#d7c8a9" font-family="Arial, sans-serif" font-size="11" letter-spacing="1">EMERALD GOLD</text>
+
+  <rect x="20" y="145" width="1560" height="42" fill="#0d2823"/>
+  <path d="M20 186H1580" stroke="#63ae8d" stroke-opacity=".24"/>
+  <text x="60" y="172" fill="#e9c574" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.7">INFO MASJID</text>
+  <circle cx="190" cy="166" r="3" fill="#d6aa59"/>
+  <text x="210" y="172" fill="#d9e3dc" font-family="Arial, sans-serif" font-size="14">Mohon luruskan dan rapatkan shaf sebelum shalat berjamaah</text>
+  <circle cx="780" cy="166" r="3" fill="#d6aa59"/>
+  <text x="800" y="172" fill="#c6d4cb" font-family="Arial, sans-serif" font-size="14">Kajian ba’da Maghrib · Senin &amp; Kamis</text>
+  <text x="1538" y="172" text-anchor="end" fill="#9bb6a5" font-family="Arial, sans-serif" font-size="12" letter-spacing="1">INFO KEGIATAN</text>
+
+  <rect x="20" y="187" width="1560" height="595" fill="url(#sky)"/>
+  <rect x="20" y="187" width="1560" height="595" fill="url(#stars)" opacity=".7"/>
+  <rect x="20" y="187" width="1560" height="595" fill="url(#horizon)"/>
+  <circle cx="1350" cy="275" r="27" fill="#f3e5bf" opacity=".9"/>
+  <circle cx="1362" cy="263" r="25" fill="#10201f"/>
+  <path d="M0 690 Q210 652 392 689 T780 679 T1185 687 T1600 660 V782 H0Z" fill="#091613" opacity=".82"/>
+
+  <g opacity=".66" fill="#0b1c17">
+    <path d="M90 692V482h22V692zM78 482l23-46 23 46zM84 474h40v9H84z"/>
+    <path d="M1380 693V447h23V693zM1369 448l22-50 23 50zM1375 438h34v10h-34z"/>
+    <path d="M1442 692V500h18V692zM1433 500l18-39 18 39z"/>
+    <path d="M210 697V572h13V697zM200 572l17-33 17 33z"/>
+  </g>
+  <g fill="#10231d" opacity=".84">
+    <path d="M300 700V614h22v86zM284 614q27-53 54 0z"/>
+    <path d="M330 700V590h18v110zM323 590q16-32 32 0z"/>
+    <path d="M1260 700V604h24v96zM1244 604q28-54 56 0z"/>
+    <path d="M1227 700V585h18v115zM1220 585q16-32 32 0z"/>
+  </g>
+  <g transform="translate(800 560)" filter="url(#shadow)">
+    <path d="M-94-80L-75-96H75L94-80V90H-94Z" fill="#090b0c" stroke="#d9ae57" stroke-opacity=".62" stroke-width="2"/>
+    <path d="M-94-80L-75-96V-30L-94-20Z" fill="#181a18"/>
+    <path d="M-75-96H75V-30H-75Z" fill="#20201b"/>
+    <path d="M-93-29H92V-7H-93Z" fill="url(#gold)"/>
+    <path d="M-92-7H92V2H-92Z" fill="#b48435" opacity=".7"/>
+    <path d="M-74 27H74" stroke="#d1a950" stroke-opacity=".28"/>
+    <path d="M-7 29H22V90H-7Z" fill="#201b10" stroke="#d4aa58" stroke-opacity=".6"/>
+    <circle cx="13" cy="59" r="2" fill="#e5c27b"/>
+  </g>
+  <text x="800" y="694" text-anchor="middle" fill="#f1dfb8" font-family="Arial, sans-serif" font-size="15" letter-spacing="3">MASJIDIL HARAM · MAKKAH</text>
+  <text x="800" y="718" text-anchor="middle" fill="#a8b5a8" font-family="Arial, sans-serif" font-size="11" letter-spacing="2">LATAR SIARAN LANGSUNG</text>
+
+  <g filter="url(#shadow)">
+    <rect x="45" y="744" width="1510" height="112" rx="20" fill="url(#glass)" stroke="#d4b366" stroke-opacity=".29"/>
+    <rect x="46" y="745" width="1508" height="110" rx="19" fill="none" stroke="#ffffff" stroke-opacity=".055"/>
+  </g>
+  <text x="73" y="773" fill="#d6bb7c" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2">JADWAL SHALAT HARI INI</text>
+  <text x="1528" y="773" text-anchor="end" fill="#91a69a" font-family="Arial, sans-serif" font-size="11" letter-spacing="1">JAKARTA PUSAT · WIB</text>
+
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <g transform="translate(69 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">IMSAK</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">04:08</text>
+    </g>
+    <g transform="translate(284 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">SUBUH</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">04:18</text>
+    </g>
+    <g transform="translate(499 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">SYURUQ</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">05:34</text>
+    </g>
+    <g transform="translate(714 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">DZUHUR</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">11:39</text>
+    </g>
+    <g transform="translate(929 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">ASHAR</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">14:58</text>
+    </g>
+    <g transform="translate(1144 790)">
+      <rect width="205" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="102.5" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">MAGHRIB</text>
+      <text x="102.5" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">17:50</text>
+    </g>
+    <g transform="translate(1359 790)">
+      <rect width="170" height="50" rx="12" fill="#ffffff" fill-opacity=".035" stroke="#d8b15f" stroke-opacity=".13"/>
+      <text x="85" y="20" fill="#a9b9ae" font-size="11" letter-spacing="1.4">ISYA</text>
+      <text x="85" y="41" fill="#f6f1e5" font-size="21" font-family="monospace">19:01</text>
+    </g>
+  </g>
+  <g transform="translate(499 790)">
+    <rect width="205" height="50" rx="12" fill="url(#active)" fill-opacity=".96" stroke="#f8dfa2" stroke-opacity=".9"/>
+    <text x="102.5" y="20" text-anchor="middle" fill="#4a3513" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4">SYURUQ</text>
+    <text x="102.5" y="41" text-anchor="middle" fill="#38280f" font-family="monospace" font-size="21" font-weight="700">05:34</text>
+  </g>
+  <text x="800" y="874" text-anchor="middle" fill="#798d81" font-family="Arial, sans-serif" font-size="10" letter-spacing="2">KONSEP TAMPILAN · JAM DIGITAL MASJID</text>
+</svg>
