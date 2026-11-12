@@ -30,6 +30,86 @@
       --line: rgba(232, 184, 75, 0.14);
       --panel-dark: rgba(6, 14, 14, 0.72);
       --danger: #e8895a;
+      --glow-primary: rgba(232, 184, 75, 0.09);
+      --glow-secondary: rgba(28, 143, 130, 0.16);
+      --glow-base: rgba(12, 38, 36, 0.9);
+      --accent-tint: rgba(232, 184, 75, 0.06);
+      --accent-border: rgba(232, 184, 75, 0.3);
+      --accent-border-strong: rgba(232, 184, 75, 0.32);
+      --secondary-tint: rgba(28, 143, 130, 0.1);
+      --secondary-border: rgba(28, 143, 130, 0.45);
+    }
+
+    :root[data-theme="sapphire"] {
+      --bg-dark: #060d18;
+      --bg-dark2: #0a192b;
+      --bg-emerald: #102b42;
+      --bg-emerald-deep: #081726;
+      --orange: #74d8ff;
+      --orange-deep: #279cc7;
+      --orange-text: #062033;
+      --cyan: #8ca9ff;
+      --cyan-deep: #455fc0;
+      --muted: #b6c8dc;
+      --line: rgba(116, 216, 255, 0.17);
+      --panel-dark: rgba(5, 14, 28, 0.76);
+      --danger: #ff887d;
+      --glow-primary: rgba(116, 216, 255, 0.12);
+      --glow-secondary: rgba(72, 112, 221, 0.18);
+      --glow-base: rgba(16, 43, 66, 0.9);
+      --accent-tint: rgba(116, 216, 255, 0.07);
+      --accent-border: rgba(116, 216, 255, 0.3);
+      --accent-border-strong: rgba(116, 216, 255, 0.34);
+      --secondary-tint: rgba(140, 169, 255, 0.1);
+      --secondary-border: rgba(140, 169, 255, 0.45);
+    }
+
+    :root[data-theme="amethyst"] {
+      --bg-dark: #100b18;
+      --bg-dark2: #1b1128;
+      --bg-emerald: #302044;
+      --bg-emerald-deep: #180f24;
+      --orange: #d6a8ff;
+      --orange-deep: #9b64d4;
+      --orange-text: #28123a;
+      --cyan: #7de0ce;
+      --cyan-deep: #328f82;
+      --muted: #d0c0dc;
+      --line: rgba(214, 168, 255, 0.17);
+      --panel-dark: rgba(18, 10, 28, 0.76);
+      --danger: #ff8a9b;
+      --glow-primary: rgba(214, 168, 255, 0.12);
+      --glow-secondary: rgba(125, 224, 206, 0.12);
+      --glow-base: rgba(48, 32, 68, 0.9);
+      --accent-tint: rgba(214, 168, 255, 0.07);
+      --accent-border: rgba(214, 168, 255, 0.3);
+      --accent-border-strong: rgba(214, 168, 255, 0.34);
+      --secondary-tint: rgba(125, 224, 206, 0.1);
+      --secondary-border: rgba(125, 224, 206, 0.45);
+    }
+
+    :root[data-theme="rose"] {
+      --bg-dark: #160b12;
+      --bg-dark2: #25111b;
+      --bg-emerald: #3a1c2a;
+      --bg-emerald-deep: #1d1018;
+      --orange: #ffb6a1;
+      --orange-deep: #d87668;
+      --orange-text: #3b1715;
+      --cyan: #f0a8cf;
+      --cyan-deep: #aa5a88;
+      --muted: #dcc2ca;
+      --line: rgba(255, 182, 161, 0.17);
+      --panel-dark: rgba(25, 10, 18, 0.76);
+      --danger: #ff8b82;
+      --glow-primary: rgba(255, 182, 161, 0.12);
+      --glow-secondary: rgba(240, 168, 207, 0.13);
+      --glow-base: rgba(58, 28, 42, 0.9);
+      --accent-tint: rgba(255, 182, 161, 0.07);
+      --accent-border: rgba(255, 182, 161, 0.3);
+      --accent-border-strong: rgba(255, 182, 161, 0.34);
+      --secondary-tint: rgba(240, 168, 207, 0.1);
+      --secondary-border: rgba(240, 168, 207, 0.45);
     }
 
     * {
@@ -46,9 +126,9 @@
 
     body {
       background:
-        radial-gradient(ellipse 90% 60% at 12% -10%, rgba(232, 184, 75, 0.09), transparent 60%),
-        radial-gradient(ellipse 70% 55% at 100% 0%, rgba(28, 143, 130, 0.16), transparent 60%),
-        radial-gradient(ellipse 80% 70% at 50% 115%, rgba(12, 38, 36, 0.9), transparent 65%),
+        radial-gradient(ellipse 90% 60% at 12% -10%, var(--glow-primary), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 100% 0%, var(--glow-secondary), transparent 60%),
+        radial-gradient(ellipse 80% 70% at 50% 115%, var(--glow-base), transparent 65%),
         linear-gradient(160deg, var(--bg-dark2) 0%, var(--bg-emerald-deep) 48%, var(--bg-dark) 100%);
       background-attachment: fixed;
       color: var(--white);
@@ -67,10 +147,10 @@
       gap: 14px;
       padding: 12px 22px;
       background:
-        linear-gradient(180deg, rgba(232, 184, 75, 0.05), transparent 40%),
+        linear-gradient(180deg, var(--accent-tint), transparent 40%),
         linear-gradient(120deg, var(--bg-emerald) 0%, var(--bg-dark2) 55%, var(--bg-dark) 100%);
       border-bottom: 1px solid var(--line);
-      box-shadow: 0 2px 0 rgba(232, 184, 75, 0.55), 0 10px 24px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 2px 0 var(--line), 0 10px 24px rgba(0, 0, 0, 0.35);
       position: relative;
       z-index: 5;
     }
@@ -203,7 +283,7 @@
       padding: 9px 18px;
       border-radius: 30px;
       background: rgba(5, 11, 14, 0.82);
-      border: 1px solid rgba(232, 184, 75, 0.3);
+      border: 1px solid var(--accent-border);
       backdrop-filter: blur(3px);
       color: var(--white);
       font-size: 12.5px;
@@ -244,7 +324,7 @@
       display: flex;
       align-items: center;
       overflow: hidden;
-      border-bottom: 1px solid rgba(232, 184, 75, 0.25);
+      border-bottom: 1px solid var(--accent-border-strong);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
       position: relative;
       z-index: 4;
@@ -370,7 +450,7 @@
       padding: 9px 22px;
       border-radius: 30px;
       background: rgba(5, 11, 14, 0.65);
-      border: 1px solid rgba(232, 184, 75, 0.3);
+      border: 1px solid var(--accent-border);
       backdrop-filter: blur(3px);
       color: var(--white);
       font-size: clamp(12px, 1.4vw, 15px);
@@ -435,7 +515,7 @@
       padding: 9px 18px;
       border-radius: 30px;
       background: rgba(5, 11, 14, 0.72);
-      border: 1px solid rgba(232, 184, 75, 0.28);
+      border: 1px solid var(--accent-border);
       backdrop-filter: blur(3px);
       color: var(--white);
       font-size: 12.5px;
@@ -446,7 +526,7 @@
       width: 15px;
       height: 15px;
       flex: 0 0 auto;
-      border: 2px solid rgba(232, 184, 75, 0.28);
+      border: 2px solid var(--accent-border);
       border-top-color: var(--orange);
       border-radius: 50%;
       animation: conn-spin 0.9s linear infinite;
@@ -492,8 +572,8 @@
       text-align: center;
       border-radius: 10px;
       padding: 10px 6px 12px;
-      background: linear-gradient(160deg, rgba(232, 184, 75, 0.06), rgba(255, 255, 255, 0.03));
-      border: 1px solid rgba(232, 184, 75, 0.12);
+      background: linear-gradient(160deg, var(--accent-tint), rgba(255, 255, 255, 0.03));
+      border: 1px solid var(--line);
       backdrop-filter: blur(2px);
       transition: all .2s ease;
     }
@@ -554,10 +634,20 @@
       box-shadow: 0 4px 18px rgba(15, 127, 176, 0.45);
     }
 
+    .p-card.ishraq-phase {
+      background: linear-gradient(180deg, var(--cyan), var(--cyan-deep));
+      border-color: var(--cyan);
+      box-shadow: 0 4px 18px rgba(15, 127, 176, 0.45);
+    }
+
     .p-card.iqomah-phase .p-label,
     .p-card.iqomah-phase .p-time,
     .p-card.iqomah-phase .p-countdown,
-    .p-card.iqomah-phase .p-iqomah {
+    .p-card.iqomah-phase .p-iqomah,
+    .p-card.ishraq-phase .p-label,
+    .p-card.ishraq-phase .p-time,
+    .p-card.ishraq-phase .p-countdown,
+    .p-card.ishraq-phase .p-iqomah {
       color: var(--white);
       opacity: 1;
     }
@@ -615,7 +705,7 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 70% 60% at 50% 40%, rgba(232, 184, 75, 0.08), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 50% 40%, var(--glow-primary), transparent 60%),
         rgba(4, 9, 10, 0.96);
       display: none;
       align-items: center;
@@ -821,16 +911,16 @@
     }
 
     .kas-box {
-      background: rgba(232, 184, 75, 0.06);
-      border: 1px dashed rgba(232, 184, 75, 0.32);
+      background: var(--accent-tint);
+      border: 1px dashed var(--accent-border-strong);
       padding: 12px;
       border-radius: 10px;
       margin-top: 10px;
     }
 
     .iqomah-box {
-      background: rgba(28, 143, 130, 0.10);
-      border: 1px dashed rgba(28, 143, 130, 0.45);
+      background: var(--secondary-tint);
+      border: 1px dashed var(--secondary-border);
       padding: 12px;
       border-radius: 10px;
       margin-top: 10px;
@@ -1007,6 +1097,15 @@
     <div class="modal">
       <h3>Pengaturan Jam Digital</h3>
 
+      <label>Tema Tampilan</label>
+      <select id="inTheme">
+        <option value="emerald">Emerald Gold</option>
+        <option value="sapphire">Sapphire Night</option>
+        <option value="amethyst">Royal Amethyst</option>
+        <option value="rose">Rose Dusk</option>
+      </select>
+      <div class="status-note" style="margin-top:4px">Pilih palet warna yang nyaman dilihat di layar masjid.</div>
+
       <label>Kode/ID Masjid (untuk multi-lokasi, tanpa spasi)</label>
       <div class="row2">
         <input type="text" id="inMasjidId" placeholder="contoh: al-ikhlas-cibubur">
@@ -1082,6 +1181,17 @@
           waktu akan berubah warna (biru) dan menghitung mundur ke waktu iqomah setelah adzan berkumandang.</div>
       </div>
 
+      <div class="iqomah-box">
+        <h4 style="margin:0 0 8px; color:var(--cyan); font-size:14px;">Syuruq &amp; Shalat Isyraq</h4>
+        <div class="row2">
+          <div><label>Koreksi waktu Syuruq (menit)</label><input type="number" min="-30" max="30" step="1" id="inSyuruqOffset"></div>
+          <div><label>Isyraq setelah Syuruq (menit)</label><input type="number" min="0" max="120" step="1" id="inIshraqDelay"></div>
+        </div>
+        <div class="status-note" style="margin-top:8px">Koreksi Syuruq menyesuaikan waktu terbit matahari hasil perhitungan
+          (nilai positif memundurkan waktu). Waktu Isyraq ditampilkan sebagai Syuruq + jeda di atas; bukan waktu
+          iqomah atau notifikasi shalat fardu.</div>
+      </div>
+
       <!-- FITUR MODE SHOLAT JUMAT -->
       <div class="iqomah-box">
         <h4 style="margin:0 0 8px; color:var(--cyan); font-size:14px;">Mode Sholat Jumat</h4>
@@ -1131,8 +1241,9 @@
 
       <label>Atau tempel Link / Video ID YouTube secara manual (opsional)</label>
       <input type="text" id="inLiveCustomUrl" placeholder="mis. https://www.youtube.com/watch?v=xxxxxxxxxxx">
-      <div class="status-note" style="margin-top:4px">Jika siaran langsung resmi diblokir oleh YouTube untuk embed,
-        pilih opsi **Makkah / Madinah Loop HD** di atas.</div>
+      <div class="status-note" style="margin-top:4px">Jika sumber terpilih tidak bisa diputar, sistem otomatis mencoba
+        sumber lain di daftar. Link manual dicoba lebih dulu sebelum sumber daftar; memilih sumber dari daftar akan
+        menghapus link manual.</div>
 
       <label>Suara Adzan-pengingat (bunyi bip saat waktu shalat tiba)</label>
       <select id="inSound">
@@ -1211,8 +1322,9 @@
   <script>
     (function () {
       const LIVE_CHANNEL_OPTIONS = [
-        { id: "MakkahLoop", channelId: "UCos52azQNBgW63_9uDJoPDA", type: "channel", label: "Kanal Resmi Al-Qur'an — Makkah" },
-        { id: "MadinahLoop", channelId: "UCROKYPep-UuODNwyipe6JMw", type: "channel", label: "Kanal Resmi As-Sunnah — Madinah" }
+        { id: "MakkahLoop", videoId: "IsJTAdC3-Jw", type: "video", label: "Kanal Resmi Al-Qur'an — Makkah" },
+        { id: "MadinahLoop", channelId: "UCROKYPep-UuODNwyipe6JMw", type: "channel", label: "Kanal Resmi As-Sunnah — Madinah" },
+        { id: "LiveAlternatifNuha", videoId: "nuhaCa5ZEl4", type: "video", label: "Makkah Live — Noor & Peace" }
       ];
 
       const JABODETABEK_PRESETS = {
@@ -1231,10 +1343,13 @@
       const DEFAULT_STATE = {
         mosqueName: "Masjid Basmatul Iman",
         mosqueCity: "Jakarta Pusat, DKI Jakarta",
+        theme: "emerald",
         cityPreset: "jakpus",
         lat: -6.1862, lng: 106.8347, tz: 7,
         fajrAngle: 20, ishaAngle: 18, imsakMinutes: 10,
         ihtiyat: 3,
+        syuruqOffsetMinutes: 0,
+        ishraqDelayMinutes: 10,
         hijriOffset: 1, // dikalibrasi ke Kalender Hijriah Indonesia Kemenag per 15 Sep 2026
         asrMethod: 1,
         sound: "on",
@@ -1515,7 +1630,7 @@
       }
       function fmt(hm) { return String(hm.h).padStart(2, '0') + ':' + String(hm.m).padStart(2, '0'); }
 
-      function computePrayerTimes(date, lat, lng, tz, fajrAngle, ishaAngle, asrT, imsakMin, ihtiyat) {
+      function computePrayerTimes(date, lat, lng, tz, fajrAngle, ishaAngle, asrT, imsakMin, ihtiyat, syuruqOffsetMin) {
         const jd = julianDate(date.getFullYear(), date.getMonth() + 1, date.getDate()) - lng / (15 * 24);
         const { decl, eqt } = sunPosition(jd + 0.5);
         const dhuhr = fixHour(12 - lng / 15 + tz - eqt);
@@ -1525,7 +1640,8 @@
         const haAsr = asrTime(asrT, lat, decl);
         const ih = (ihtiyat || 0) / 60;
         const fajr = (haFajr !== null ? dhuhr - haFajr : dhuhr - 1.5) + ih;
-        const sunrise = (haSun !== null ? dhuhr - haSun : dhuhr - 1.0) - ih;
+        const syuruqOffset = Number.isFinite(Number(syuruqOffsetMin)) ? Number(syuruqOffsetMin) / 60 : 0;
+        const sunrise = (haSun !== null ? dhuhr - haSun : dhuhr - 1.0) - ih + syuruqOffset;
         const maghrib = (haSun !== null ? dhuhr + haSun : dhuhr + 1.0) + ih;
         const isha = (haIsha !== null ? dhuhr + haIsha : maghrib + 1.3) + ih;
         const asr = dhuhr + haAsr + ih;
@@ -1869,11 +1985,156 @@
         }
       }
 
+      const STREAM_START_TIMEOUT_MS = 20000;
+      let streamCandidates = [];
+      let streamCandidateIndex = 0;
+      let streamAttemptId = 0;
+      let streamStartTimer = null;
+      let streamHasPlayed = false;
+      let youtubeApiRequested = false;
+      let youtubePlayer = null;
+
+      function stopStreamPlayer() {
+        clearTimeout(streamStartTimer);
+        streamStartTimer = null;
+        streamAttemptId++;
+        const player = youtubePlayer;
+        youtubePlayer = null;
+        if (player && typeof player.destroy === 'function') {
+          try {
+            player.destroy();
+          } catch (error) {
+            console.warn('Pemutar YouTube gagal dihentikan dengan bersih.', error);
+          }
+        }
+      }
+
+      function scheduleStreamFallback(attemptId) {
+        clearTimeout(streamStartTimer);
+        streamStartTimer = setTimeout(() => {
+          if (attemptId === streamAttemptId) {
+            console.warn('Siaran YouTube tidak mulai diputar; mencoba sumber berikutnya.');
+            tryNextStreamCandidate(attemptId);
+          }
+        }, STREAM_START_TIMEOUT_MS);
+      }
+
+      function initializeYoutubePlayer(attemptId) {
+        if (attemptId !== streamAttemptId || !window.YT || !window.YT.Player) return;
+        const iframe = $('bgYtFrame');
+        if (!iframe) return;
+
+        try {
+          youtubePlayer = new window.YT.Player(iframe, {
+            events: {
+              onReady: (event) => {
+                if (attemptId !== streamAttemptId) return;
+                try {
+                  event.target.mute();
+                  event.target.playVideo();
+                } catch (error) {
+                  console.error('Pemutar YouTube gagal memulai video.', error);
+                  tryNextStreamCandidate(attemptId);
+                  return;
+                }
+                scheduleStreamFallback(attemptId);
+              },
+              onStateChange: (event) => {
+                if (attemptId !== streamAttemptId) return;
+                if (event.data === window.YT.PlayerState.PLAYING) {
+                  streamHasPlayed = true;
+                  clearTimeout(streamStartTimer);
+                  streamStartTimer = null;
+                } else if (event.data === window.YT.PlayerState.ENDED) {
+                  tryNextStreamCandidate(attemptId);
+                } else if (event.data === window.YT.PlayerState.BUFFERING && streamHasPlayed) {
+                  scheduleStreamFallback(attemptId);
+                }
+              },
+              onError: (event) => {
+                if (attemptId !== streamAttemptId) return;
+                console.warn(`Sumber YouTube gagal diputar (kode ${event.data}); mencoba sumber berikutnya.`);
+                tryNextStreamCandidate(attemptId);
+              }
+            }
+          });
+        } catch (error) {
+          console.error('YouTube Player API gagal diinisialisasi.', error);
+          tryNextStreamCandidate(attemptId);
+        }
+      }
+
+      function loadYoutubePlayerApi(attemptId) {
+        if (window.YT && window.YT.Player) {
+          initializeYoutubePlayer(attemptId);
+          return;
+        }
+        if (youtubeApiRequested) return;
+
+        youtubeApiRequested = true;
+        window.onYouTubeIframeAPIReady = () => initializeYoutubePlayer(streamAttemptId);
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        script.async = true;
+        script.onerror = () => {
+          console.error('YouTube IFrame Player API gagal dimuat; sumber akan dicoba ulang dengan batas waktu.');
+          youtubeApiRequested = false;
+        };
+        document.head.appendChild(script);
+      }
+
+      function tryNextStreamCandidate(attemptId) {
+        if (attemptId !== streamAttemptId) return;
+        const failed = streamCandidates[streamCandidateIndex];
+        if (failed) console.warn(`Sumber streaming "${failed.label}" tidak tersedia; beralih ke sumber berikutnya.`);
+        loadStreamCandidate(streamCandidateIndex + 1);
+      }
+
+      function loadStreamCandidate(index) {
+        stopStreamPlayer();
+        streamCandidateIndex = index;
+        streamHasPlayed = false;
+        const inner = $('bgVideoInner');
+        const btn = $('bgToggleBtn');
+
+        if (index >= streamCandidates.length) {
+          console.error('Semua sumber streaming gagal diputar; menampilkan screensaver.');
+          startScreensaver();
+          btn.classList.remove('off');
+          return;
+        }
+
+        const source = streamCandidates[index];
+        const videoId = source.type === 'video' ? source.videoId : '';
+        const params = new URLSearchParams({
+          autoplay: '1',
+          mute: '1',
+          controls: '0',
+          enablejsapi: '1',
+          playsinline: '1',
+          origin: window.location.origin
+        });
+        if (videoId) {
+          params.set('loop', '1');
+          params.set('playlist', videoId);
+        }
+        const src = videoId
+          ? `https://www.youtube.com/embed/${videoId}?${params}`
+          : `https://www.youtube.com/embed/live_stream?channel=${source.channelId}&${params}`;
+
+        stopScreensaver();
+        inner.innerHTML = `<iframe id="bgYtFrame" src="${src}" title="Live Streaming Masjid" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+        const attemptId = streamAttemptId;
+        scheduleStreamFallback(attemptId);
+        loadYoutubePlayerApi(attemptId);
+      }
+
       function renderBgStream() {
         const inner = $('bgVideoInner');
         const btn = $('bgToggleBtn');
 
         if (state.bgStream !== 'on') {
+          stopStreamPlayer();
           startScreensaver();
           btn.classList.add('off');
           setConnOverlay(false);
@@ -1896,34 +2157,34 @@
         // dibuka), tampilan pakai screensaver — jadi tidak ada celah bagi browser
         // untuk sempat menampilkan halaman error jaringannya sendiri.
         if (!connKnownGood) {
+          stopStreamPlayer();
           startScreensaver();
           btn.classList.remove('off'); // live streaming tetap "diinginkan aktif", cuma menunggu koneksi
           return;
         }
 
-        stopScreensaver();
-
         const customId = extractYoutubeId(state.liveCustomUrl);
-        let src = "";
 
         if (state.liveCustomUrl && !customId) {
+          stopStreamPlayer();
           inner.innerHTML = '<div class="video-fallback">Link YouTube tidak valid.<br>Pastikan formatnya seperti https://www.youtube.com/watch?v=...</div>';
           btn.classList.add('off');
           return;
         }
 
-        if (customId) {
-          src = `https://www.youtube.com/embed/${customId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${customId}&enablejsapi=1`;
-        } else {
-          const selected = LIVE_CHANNEL_OPTIONS.find(o => o.id === state.liveChannelId) || LIVE_CHANNEL_OPTIONS[0];
-          if (selected.type === 'video') {
-            src = `https://www.youtube.com/embed/${selected.videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${selected.videoId}&enablejsapi=1`;
-          } else {
-            src = `https://www.youtube.com/embed/live_stream?channel=${selected.channelId}&autoplay=1&mute=1&controls=0&enablejsapi=1`;
-          }
-        }
-
-        inner.innerHTML = `<iframe id="bgYtFrame" src="${src}" title="Live Streaming Masjid" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+        const selected = LIVE_CHANNEL_OPTIONS.find(o => o.id === state.liveChannelId) || LIVE_CHANNEL_OPTIONS[0];
+        streamCandidates = [];
+        if (customId) streamCandidates.push({ type: 'video', videoId: customId, label: 'Link YouTube manual' });
+        else streamCandidates.push(selected);
+        streamCandidates.push(...LIVE_CHANNEL_OPTIONS.filter(o => o.id !== selected.id));
+        const seen = new Set();
+        streamCandidates = streamCandidates.filter(source => {
+          const key = source.type === 'video' ? `video:${source.videoId}` : `channel:${source.channelId}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        loadStreamCandidate(0);
         btn.classList.remove('off');
       }
 
@@ -2012,7 +2273,7 @@
 
       function refreshPrayerTimes() {
         const now = getNow();
-        todayTimes = computePrayerTimes(now, state.lat, state.lng, state.tz, state.fajrAngle, state.ishaAngle, state.asrMethod, state.imsakMinutes, state.ihtiyat);
+        todayTimes = computePrayerTimes(now, state.lat, state.lng, state.tz, state.fajrAngle, state.ishaAngle, state.asrMethod, state.imsakMinutes, state.ihtiyat, state.syuruqOffsetMinutes);
         lastComputedDateStr = now.toDateString();
         renderPrayerGrid(now);
       }
@@ -2040,6 +2301,15 @@
         return getRawIqomahDelay(name);
       }
 
+      function getIshraqDelay() {
+        const delay = Number(state.ishraqDelayMinutes);
+        return Number.isFinite(delay) ? Math.min(120, Math.max(0, delay)) : DEFAULT_STATE.ishraqDelayMinutes;
+      }
+
+      function getIshraqMinutes() {
+        return minutesOfDay(todayTimes.Syuruq) + getIshraqDelay();
+      }
+
       function renderPrayerGrid(date) {
         const refDate = date || getNow();
         const grid = $('prayerGrid');
@@ -2053,7 +2323,10 @@
           const isJumatDzuhur = name === 'Dzuhur' && isJumatToday(refDate);
           const iqLabel = isJumatDzuhur ? 'Khutbah+Jumat' : 'Iqomah';
           const iqLine = IQOMAH_PRAYERS.includes(name) ? `<div class="p-iqomah" id="iq-${name}">${iqLabel} +${getIqomahDelay(name)} mnt</div>` : '';
-          div.innerHTML = `<div class="p-label">${label}</div><div class="p-time">${fmt(t)}</div><div class="p-countdown" id="cd-${name}"></div>${iqLine}`;
+          const ishraqLine = name === 'Syuruq'
+            ? `<div class="p-iqomah">Isyraq mulai ${fmt(decToHM(getIshraqMinutes() / 60))} (+${getIshraqDelay()} mnt)</div>`
+            : '';
+          div.innerHTML = `<div class="p-label">${label}</div><div class="p-time">${fmt(t)}</div><div class="p-countdown" id="cd-${name}"></div>${iqLine}${ishraqLine}`;
           grid.appendChild(div);
         });
       }
@@ -2075,6 +2348,16 @@
 
         for (const name of NEXT_EVENT_ORDER) {
           const adzanMin = minutesOfDay(todayTimes[name]);
+          if (name === 'Syuruq') {
+            if (nowMin < adzanMin) {
+              return { name, minutes: adzanMin, phase: 'sunrise' };
+            }
+            const ishraqMin = getIshraqMinutes();
+            if (nowMin < ishraqMin) {
+              return { name, minutes: ishraqMin, phase: 'ishraq' };
+            }
+            continue;
+          }
           if (!IQOMAH_PRAYERS.includes(name)) {
             if (nowMin < adzanMin) {
               return { name, minutes: adzanMin, phase: 'adzan' };
@@ -2328,7 +2611,7 @@
         if (!todayTimes) return;
 
         document.querySelectorAll('.p-card').forEach(c => {
-          c.classList.remove('active', 'iqomah-phase');
+          c.classList.remove('active', 'iqomah-phase', 'ishraq-phase');
           const cd = c.querySelector('.p-countdown');
           if (cd) cd.textContent = '';
         });
@@ -2344,9 +2627,9 @@
         const dsec = Math.floor((diffMin * 60) % 60);
 
         if (nextCard) {
-          nextCard.classList.add(next.phase === 'iqomah' ? 'iqomah-phase' : 'active');
+          nextCard.classList.add(next.phase === 'iqomah' ? 'iqomah-phase' : next.phase === 'ishraq' ? 'ishraq-phase' : 'active');
           const cd = $('cd-' + next.name);
-          const prefix = next.phase === 'iqomah' ? 'Iqomah -' : '-';
+          const prefix = next.phase === 'iqomah' ? 'Iqomah -' : next.phase === 'ishraq' ? 'Isyraq -' : '-';
           if (cd) cd.textContent = `${prefix}${String(dh).padStart(2, '0')}:${String(dm).padStart(2, '0')}:${String(dsec).padStart(2, '0')}`;
         }
 
@@ -2376,6 +2659,8 @@
       }
 
       function applyStateToDom() {
+        const theme = ['emerald', 'sapphire', 'amethyst', 'rose'].includes(state.theme) ? state.theme : 'emerald';
+        document.documentElement.dataset.theme = theme;
         $('mosqueName').textContent = state.mosqueName;
         $('mosqueCity').textContent = state.mosqueCity;
         $('petugasLabel').textContent = state.petugasLabel;
@@ -2440,6 +2725,7 @@
       });
 
       function populateModalFields() {
+        $('inTheme').value = ['emerald', 'sapphire', 'amethyst', 'rose'].includes(state.theme) ? state.theme : DEFAULT_STATE.theme;
         $('inMasjidId').value = MASJID_ID;
         const shareUrl = new URL(window.location.href);
         shareUrl.search = '';
@@ -2459,6 +2745,8 @@
         $('inIsha').value = state.ishaAngle;
         $('inImsak').value = state.imsakMinutes;
         $('inIhtiyat').value = state.ihtiyat;
+        $('inSyuruqOffset').value = state.syuruqOffsetMinutes !== undefined ? state.syuruqOffsetMinutes : DEFAULT_STATE.syuruqOffsetMinutes;
+        $('inIshraqDelay').value = state.ishraqDelayMinutes !== undefined ? state.ishraqDelayMinutes : DEFAULT_STATE.ishraqDelayMinutes;
         $('inHijriOffset').value = state.hijriOffset !== undefined ? state.hijriOffset : 0;
         $('inBgStream').value = state.bgStream;
         $('inLiveCustomUrl').value = state.liveCustomUrl || '';
@@ -2581,6 +2869,10 @@
         $('modalBg').classList.remove('show');
       });
 
+      $('inLiveChannel').addEventListener('change', () => {
+        $('inLiveCustomUrl').value = '';
+      });
+
       $('bgToggleBtn').addEventListener('click', () => {
         state.bgStream = state.bgStream === 'on' ? 'off' : 'on';
         saveState();
@@ -2675,6 +2967,7 @@
       });
 
       $('saveSettings').addEventListener('click', () => {
+        state.theme = $('inTheme').value;
         state.mosqueName = $('inMosqueName').value.trim() || DEFAULT_STATE.mosqueName;
         state.mosqueCity = $('inMosqueCity').value.trim() || DEFAULT_STATE.mosqueCity;
         state.cityPreset = $('inCityPreset').value;
@@ -2686,6 +2979,8 @@
         state.ishaAngle = parseFloat($('inIsha').value) || 18;
         state.imsakMinutes = parseInt($('inImsak').value) || 10;
         state.ihtiyat = parseInt($('inIhtiyat').value) || 0;
+        state.syuruqOffsetMinutes = Math.max(-30, Math.min(30, parseInt($('inSyuruqOffset').value, 10) || 0));
+        state.ishraqDelayMinutes = Math.max(0, Math.min(120, parseInt($('inIshraqDelay').value, 10) || 0));
         state.hijriOffset = parseInt($('inHijriOffset').value) || 0;
         state.bgStream = $('inBgStream').value;
         state.liveChannelId = $('inLiveChannel').value;
