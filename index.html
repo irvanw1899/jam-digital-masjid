@@ -1604,7 +1604,7 @@
         <div class="status-note" style="margin-top:8px">Koreksi Syuruq menyesuaikan waktu terbit matahari hasil
           perhitungan
           (nilai positif memundurkan waktu). Waktu Isyraq ditampilkan sebagai Syuruq + jeda di atas; bukan waktu
-          iqomah atau notifikasi shalat fardu.</div>
+          iqomah atau waktu shalat fardu. Pengingat khusus Isyraq mengikuti pengaturan suara/notifikasi di bawah.</div>
       </div>
 
       <!-- FITUR MODE SHOLAT JUMAT -->
@@ -1660,7 +1660,7 @@
         sumber alternatif. Link manual dicoba lebih dulu; jika semua gagal, sistem akan mencoba ulang otomatis.
         Memilih sumber dari daftar akan menghapus link manual.</div>
 
-      <label>Suara Adzan-pengingat (bunyi bip saat waktu shalat tiba)</label>
+      <label>Suara Pengingat (Adzan, Iqomah, dan Isyraq)</label>
       <select id="inSound">
         <option value="on">Aktif</option>
         <option value="off">Nonaktif</option>
@@ -1690,17 +1690,17 @@
         mengeluarkan suara. Nada Adzan (3x, nada tinggi) dan Iqomah (2x, nada lebih rendah) sengaja dibedakan supaya
         mudah dikenali tanpa melihat layar. Ikon 🔔 di pojok kanan atas header menunjukkan status: <b>hijau</b> =
         suara siap dimainkan, <b>oranye</b> = browser memblokir audio otomatis (klik ikon tsb, atau sentuh layar
-        sekali saja untuk mengaktifkan kembali). Setiap kali waktu adzan/iqomah benar-benar masuk, sistem otomatis
+        sekali saja untuk mengaktifkan kembali). Setiap kali waktu adzan/iqomah/Isyraq benar-benar masuk, sistem otomatis
         mengecek apakah beep berhasil dimainkan dan menampilkan notifikasi kecil di pojok kanan atas sebagai
         konfirmasi. Sistem juga <b>otomatis mencoba memulihkan audio secara diam-diam</b> secara berkala dan setiap
         kali layar/tab ini aktif kembali — sebagai jaring pengaman kalau suara sempat terblokir ulang tanpa ada yang
         menyadarinya.</div>
 
-      <label>Durasi Notifikasi Iqomah & Fallback Tampil di Layar (detik)</label>
+      <label>Durasi Notifikasi Iqomah/Isyraq & Fallback Tampil di Layar (detik)</label>
       <input type="number" id="inNotifDuration" min="5" max="300" step="5">
       <div class="status-note" style="margin-top:4px">Notifikasi <b>Adzan</b> otomatis tertutup sesuai jeda menuju
-        Iqomah masing-masing shalat (atur di bagian "Durasi Iqomah" di atas). Durasi di sini hanya dipakai untuk
-        notifikasi <b>Iqomah</b> itu sendiri, dan sebagai cadangan bila jeda iqomah shalat tsb diset 0.</div>
+        Iqomah masing-masing shalat (atur di bagian "Durasi Iqomah" di atas). Durasi di sini dipakai untuk notifikasi
+        <b>Iqomah</b> dan pengingat <b>Isyraq</b>, serta sebagai cadangan bila jeda iqomah shalat tersebut diset 0.</div>
 
       <label>Kecepatan Teks Berjalan (px/detik)</label>
       <input type="number" id="inTickerSpeed" min="10" max="400" step="5">
@@ -1801,6 +1801,7 @@
       let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
       let lastAdzanKey = null;
       let lastIqomahKey = null;
+      let lastIshraqKey = null;
       let adzanHideTimer = null;
       let iqomahCountdownTarget = null; // Date object: waktu iqomah yang sedang dihitung mundur (null jika tidak aktif)
       const $ = id => document.getElementById(id);
@@ -2791,7 +2792,7 @@
       }
 
       function playBeep(kind) {
-        const isRealTrigger = (kind === 'azan' || kind === 'iqomah');
+        const isRealTrigger = (kind === 'azan' || kind === 'iqomah' || kind === 'ishraq');
         if (isRealTrigger && state.sound !== 'on') {
           return Promise.resolve(null);
         }
@@ -2899,7 +2900,7 @@
       // Mainkan beep dan/atau suara bicara sesuai state.notifVoiceMode.
       // Return promise yang resolve true kalau minimal salah satu berhasil.
       function playNotificationSound(beepKind, speechText) {
-        const isRealTrigger = (beepKind === 'azan' || beepKind === 'iqomah');
+        const isRealTrigger = (beepKind === 'azan' || beepKind === 'iqomah' || beepKind === 'ishraq');
         if (isRealTrigger && state.sound !== 'on') return Promise.resolve(null);
         const mode = state.notifVoiceMode || 'beep';
         const doBeep = mode === 'beep' || mode === 'both';
@@ -2964,6 +2965,27 @@
             showBeepToast(false, `⚠ Notifikasi Adzan ${displayName} GAGAL — audio diblokir browser`);
           } else {
             console.log(`[Cek Suara] Adzan ${displayName}: suara memang dinonaktifkan di pengaturan`);
+          }
+        });
+      }
+
+      function triggerIshraqNotice() {
+        $('adzanOverlay').classList.remove('iqomah-mode');
+        $('adzanText').textContent = 'WAKTU ISYRAQ MULAI';
+        $('adzanSub').textContent = 'Waktu shalat sunnah Isyraq telah tiba';
+        iqomahCountdownTarget = null;
+        $('adzanTimerLabel').style.display = 'none';
+        $('adzanTimer').classList.remove('show');
+        $('adzanOverlay').classList.add('show');
+        scheduleAutoHide();
+
+        playNotificationSound('ishraq', 'Perhatian, waktu Isyraq mulai').then(ok => {
+          if (ok === true) {
+            console.log(`[Cek Suara] Isyraq: berhasil dimainkan pukul ${getNow().toLocaleTimeString('id-ID')}`);
+            showBeepToast(true, '🔊 Notifikasi Isyraq dimainkan');
+          } else if (ok === false) {
+            console.warn('[Cek Suara] Isyraq: GAGAL dimainkan (browser memblokir audio otomatis)');
+            showBeepToast(false, '⚠ Notifikasi Isyraq GAGAL — audio diblokir browser');
           }
         });
       }
@@ -3083,6 +3105,17 @@
             }
           }
         });
+
+        const ishraqMinOfDay = ((getIshraqMinutes() % 1440) + 1440) % 1440;
+        const ishraqHour = Math.floor(ishraqMinOfDay / 60);
+        const ishraqMinute = Math.floor(ishraqMinOfDay % 60);
+        if (ishraqHour === now.getHours() && ishraqMinute === now.getMinutes()) {
+          const key = `${now.toDateString()}-ishraq`;
+          if (lastIshraqKey !== key) {
+            lastIshraqKey = key;
+            triggerIshraqNotice();
+          }
+        }
       }
 
       function applyStateToDom() {
